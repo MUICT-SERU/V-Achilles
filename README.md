@@ -11,4 +11,4 @@
 - https://ieeexplore.ieee.org/document/7181461 Co-Usage Visualization
 - https://soarsmu.github.io/papers/wcre13-librecommend.pdf Using Collaborative Filtering to recommend libraries.
 - https://sel.ist.osaka-u.ac.jp/people/boris-t/, https://sel.ist.osaka-u.ac.jp/lab-db/betuzuri/archive/1087/1087.pdf, SOL Mantra
-- https://dl.acm.org/doi/10.1145/2623330.2623342, https://poloclub.github.io/polochau/papers/14_kdd_aesop.pdf
+- Guit by Association: Large Scale Malware Detection byMining File-relation Graphs: https://dl.acm.org/doi/10.1145/2623330.2623342, https://poloclub.github.io/polochau/papers/14_kdd_aesop.pdf
