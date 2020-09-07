@@ -2,6 +2,7 @@
 ## Key Idea
 - Visualization to capture the distance of a project dependencies to all available vulnerabilities.
 - Maybe our assumption is that if a vulnerability library is co-used, there is a closer distance.
+- Adjusted idea is that we can make a report on those that are affected by a vulnerability. We would like to characterize the projects based on similarities. Proposed measures could be textual descriptions, source code and the dependencies similarities.
 
 ## Minutes of Meeting
 - Mon. 3 Aug 2020: https://www.notion.so/Meeting-4-80fc86a885a043818c2bb64ff3cea2e7
