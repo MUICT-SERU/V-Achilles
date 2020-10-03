@@ -1,0 +1,6 @@
+[submodule "baak-repository-vulnerability-identify"]
+	path = baak-repository-vulnerability-identify
+	url = https://github.com/ampere111/baak-repository-vulnerability-identify.git
+[submodule "baak-dataload-script"]
+	path = baak-dataload-script
+	url = https://github.com/ampere111/baak-dataload-script
