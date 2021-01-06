@@ -19,3 +19,8 @@
 - https://ieeexplore.ieee.org/document/7816479 They provided a manual category of GitHub repositories.
 - https://seal.ics.uci.edu/publications/2014FASE.pdf This one did another way around. Strange!
 - https://ouniali.github.io/papers/IST2016-LibFinder.pdf Library recommendation using co-usage, usage and semantic similarity of identifiers.
+
+## Definition of Done
+- The code/implementation of that task is already committed to the repo (in each developer's branch)
+- A pull request is created to merge the change into the master branch.
+- The pull request is approved and merged.
