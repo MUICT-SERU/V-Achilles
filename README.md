@@ -21,6 +21,10 @@
 - https://ouniali.github.io/papers/IST2016-LibFinder.pdf Library recommendation using co-usage, usage and semantic similarity of identifiers.
 
 ## Definition of Done
+### Features/Implementations
 - The code/implementation of that task is already committed to the repo (in each developer's branch)
 - A pull request is created to merge the change into the master branch.
 - The pull request is approved and merged.
+### Documents/Administrative Work
+- The documents have been uploaded to Google Drive folder
+- OR the documents have been submitted to the submission system.
