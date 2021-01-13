@@ -23,8 +23,9 @@ import HttpUtil from "../../utils/http-util";
 import { ROUTE_API } from "../../utils/route-util";
 
 import Loading from "../../components/Loading";
-import AlertDialog from "../../components/AlertDialog";
 import { CyanButton, DisabledButton } from "../../components/CustomButton";
+
+import PackageJsonModal from "./PackageJsonModal";
 
 interface Project {
   ownerName: string;
@@ -91,13 +92,16 @@ const ProjectList: React.FC = () => {
   const classes = useStyles();
   const access_token = localStorage.getItem("token") || "";
 
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false); // open modal for pacakge json list
   const [isLoading, setLoading] = useState(false);
   const [searchRepo, setSearchRepo] = useState("");
   const [isPackgeJsonLoading, setPackgeJsonLoading] = useState(false);
 
   const [selectedProject, setSelectedProject] = useState("");
+  const [selectedJsonPath, setSelectedJsonPath] = useState("");
 
+  const [paths, setPaths] = useState([]); // path for package json content
+  const [packageJsonUrl, setPackgeJsonUrl] = useState("");
   const [allProjects, setAllProjects] = useState<Project[]>([]);
   const [userProjects, setUserProjects] = useState([]);
   const [contributeProjects, setContributeProjects] = useState([]);
@@ -138,6 +142,7 @@ const ProjectList: React.FC = () => {
   const onSelectedProject = (event: any) => {
     const value = event.target.value;
     setSelectedProject(value);
+    setSelectedJsonPath("");
   };
 
   const onFindVulnerabilities = () => {
@@ -158,30 +163,51 @@ const ProjectList: React.FC = () => {
             "This repository is not allowed to analyze. Please select only the npm project that have package.json file",
             "error"
           );
+        } else {
+          const packgeJsonUrls = response.data.packgeJsonUrls;
+          setPackgeJsonUrl(packgeJsonUrls.contentUrl);
+          setPaths(packgeJsonUrls.paths);
+          if (packgeJsonUrls.paths.length > 1) setOpen(true);
+          else {
+            setSelectedJsonPath(packgeJsonUrls.paths[0]);
+            onGetPackageJsonContent(packgeJsonUrls.contentUrl);
+          }
         }
       })
       .catch((err) => {
         console.log(err);
         setPackgeJsonLoading(false);
       });
-
-    // const index = allProjects.findIndex(
-    //   (item: Project) => item.projectName === selectedProject
-    // );
-
-    // HttpUtil.get(
-    //   `${ROUTE_API.packageJsonContent}?access_token=${access_token}&selectedRepo=${allProjects[index].projectName}&ownerName=${allProjects[index].ownerName}`
-    // )
-    //   .then((response) => {
-    //     console.log(response.data);
-    //   })
-    //   .catch((err) => console.log(err));
   };
 
-  // const closeAlert = (openState: boolean) => {
-  //   if (openState) setOpen(false);
-  //   else return;
-  // };
+  const onGetPackageJsonContent = (url: string) => {
+    HttpUtil.get(
+      `${
+        ROUTE_API.packageJsonContent
+      }?access_token=${access_token}&packageJsonUrl=${url}${
+        selectedJsonPath ? selectedJsonPath : "package.json"
+      }`
+    )
+      .then((response) => {
+        console.log(response.data);
+        setPackgeJsonLoading(false);
+      })
+      .catch((err) => {
+        console.log(err);
+        setPackgeJsonLoading(false);
+      });
+  };
+
+  const analyzeButton = () => {
+    setOpen(false);
+    setPackgeJsonLoading(true);
+    onGetPackageJsonContent(packageJsonUrl);
+  };
+
+  const cancelButton = () => {
+    setSelectedJsonPath("");
+    setOpen(false);
+  };
 
   const renderProjectList = (projects: Project[]) => {
     return (
@@ -342,14 +368,14 @@ const ProjectList: React.FC = () => {
         )}
       </Box>
 
-      <AlertDialog
+      <PackageJsonModal
         {...{
-          open: open,
-          title: "Sorry! this repository is not allowed to analyze",
-          content:
-            "Please select only the npm project that have package.json file",
-          firstButton: { text: "Close", action: () => setOpen(false) },
-          handleClose: () => setOpen(false),
+          open,
+          paths,
+          selectedJsonPath,
+          setSelectedJsonPath,
+          cancelButton,
+          analyzeButton,
         }}
       />
     </>
