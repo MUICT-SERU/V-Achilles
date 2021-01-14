@@ -281,7 +281,7 @@ const Chart = (props: any) => {
             simulation.current ? (
               <>
                 <Link setLinks={setLinks} data={linksData} simulation={simulation.current}/>
-                <Node setNodes={setNodes} data={nodesData} simulation={simulation.current} nodes={nodesData} links={linksData}/>
+                <Node setNodes={setNodes} data={nodesData} simulation={simulation.current}/>
               </>
             ) : (
               <text fill="#fff">Generating...</text>
