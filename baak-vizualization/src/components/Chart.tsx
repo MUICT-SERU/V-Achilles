@@ -1,5 +1,5 @@
 import * as d3 from 'd3'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, useMemo } from 'react'
 
 import Node from 'components/Node'
 import Link from 'components/Link'
@@ -12,12 +12,19 @@ import { NODE_TYPE, NODE_STATUS } from 'types/index'
 const height: number = 600
 const width: number = 600
 
-let i = 3
+let nodeCount = 3
 
 const mockNodesData: INode[] = [
-  { id: 1, type: NODE_TYPE.ROOT, status: NODE_STATUS.CLEAN, version: '', level: 0  },
-  { id: 2, type: NODE_TYPE.DEPENDENCY, status: NODE_STATUS.CLEAN, version: '', level: 1  },
-  { id: 3, type: NODE_TYPE.DEPENDENCY, status: NODE_STATUS.CLEAN, version: '', level: 1  },
+  { id: 'PROJECT', name: 'PROJECT', type: NODE_TYPE.ROOT, status: NODE_STATUS.CLEAN, version: '', level: 0  },
+  // { id: 1, name: '1', type: NODE_TYPE.DEPENDENCY, status: NODE_STATUS.CLEAN, version: '', level: 1  },
+  // { id: 2, name: '2', type: NODE_TYPE.DEPENDENCY, status: NODE_STATUS.CLEAN, version: '', level: 1  },
+  // { id: 3, name: '3', type: NODE_TYPE.DEPENDENCY, status: NODE_STATUS.CLEAN, version: '', level: 2  },
+]
+
+const mockLinksData: ILink[] = [
+  // { source: 1, target: 'PROJECT', level: 1 },
+  // { source: 2, target: 'PROJECT', level: 1 },
+  // { source: 3, target: 1, level: 1 },
 ]
 
 const Chart = (props: any) => {
@@ -30,12 +37,15 @@ const Chart = (props: any) => {
   const nodeInput = useRef<any>()
 
   const [nodesData, setNodesData] = useState<INode[]>(mockNodesData)
-  const [linksData, setLinksData] = useState<ILink[]>( [{ source: 2, target: 1 }, { source: 3, target: 1 }] )
+  const [linksData, setLinksData] = useState<ILink[]>(mockLinksData)
   const [depData, setDepData] = useState<any>([])
+  const [nodeLevel, setNodeLevel] = useState<number>(1)
 
   const [nodes, setNodes] = useState<any>()
   const [links, setLinks] = useState<any>()
   // const [nodeInput, setNodeInput] = useState<any>(1)
+
+  const isDone = useRef(true)
 
   const interval = useRef<any>(null)
 
@@ -63,6 +73,12 @@ const Chart = (props: any) => {
     if (depData.length > 0) {
       animate()
     }
+
+    console.log('Here', isDone.current)
+    if (depData.length <= 0 && !isDone.current) {
+      console.log('in 1')
+      fetchChildrenNodes()
+    }
   }, [depData])
 
   // Data change
@@ -71,32 +87,21 @@ const Chart = (props: any) => {
       analyzePackageJson(data)
     }
   }
-  // Create D3 element
-  // function createNode(packageName: any, version: any) {
-  //   return {
-  //     id: packageName,
-  //     version,
-  //   }
-  // }
-  // function createLink(packageName: any, targetNode = 1) {
-  //   return {
-  //     source: packageName,
-  //     target: targetNode,
-  //   }
-  // }
 
   async function animate() {
-    const ADD_NODE_SPEED = 1000
+    const ADD_NODE_SPEED = 250
 
     // Gently add node/link
     function gentlyAddNodeLink(dependency: any) {
       return new Promise((resolve) => {
+        const node = createNodeData(dependency.node.id, dependency.node.version, dependency.node.level)
+        // if (isNodeExists(node)) {
+        //   return resolve(null)
+        // }
+
         setTimeout(() => {
-          // Add Node
-          // nodes.push(createNode(dependency, dependencies[dependency]))
-          // Add Link
-          // links.push(createLink(dependency))
-          addNodeLink(dependency)
+
+          addNodeLink(node, dependency.link.id)
           resolve(null)
         }, ADD_NODE_SPEED)
       })
@@ -120,10 +125,25 @@ const Chart = (props: any) => {
     const _data = []
 
     for (const dependency in dependencies) {
-      _data.push(dependency)
+      _data.push({
+        node: {
+          id: dependency,
+          version: dependencies[dependency],
+          level: nodeLevel,
+        },
+        link: {
+          id: 'PROJECT'
+        },
+      })
     }
 
     setDepData(_data)
+    console.log('nodeLevel + 1', nodeLevel + 1)
+
+    if (Object.keys(dependencies).length > 0) {
+      setNodeLevel(nodeLevel + 1)
+      isDone.current = false
+    }
   }
 
   // --------------------------------------------------------
@@ -142,6 +162,7 @@ const Chart = (props: any) => {
   // }, [nodes, links])
 
   // --------------------------------------------------------
+  // ======== Setup D3
   // --------------------------------------------------------
 
   function setupZoom() {
@@ -219,15 +240,49 @@ const Chart = (props: any) => {
   }
 
   function addNodeLink(source: INode, target: string | number = 1) {
-    setNodesData([...nodesData, source])
-    setLinksData([...linksData, { source: source.id, target: target }])
+    addNodeData(source)
+    addLinkData(createLinkData(source, target))
   }
 
-  function createNodeData(id: string | number = ++i, version = '*', level = 1, type= NODE_TYPE.DEPENDENCY, status = NODE_STATUS.CLEAN): INode {
-    return ({ id: `${id}@${version}`, version, level, type, status })
+  // --------------------------------
+  // ====== Create Node / Link data
+  // --------------------------------
+
+  function createNodeData(id: string | number = ++nodeCount, version = '*', level = 1, type= NODE_TYPE.DEPENDENCY, status = NODE_STATUS.CLEAN): INode {
+    return ({ id: `${id}@${version}`, name: id.toString(), version, level, type, status })
   }
 
-  function onAddNode() {
+  function createLinkData(source: INode, target: string | number = 'PROJECT', level = 1): ILink {
+    return ({ source: source.id, target, level })
+  }
+
+  // --------------------------------
+  // ====== Manipulate Nodes / Links
+  // --------------------------------
+
+  function isNodeExists(node: INode) {
+    // Check exists
+    for(let i = 0; i < nodesData.length; i++) {
+      if (nodesData[i].id === node.id) return true;
+    }
+
+    return false
+  }
+
+  function addNodeData(node: INode) {
+    if (!isNodeExists(node))
+      setNodesData([...nodesData, node])
+  }
+
+  function addLinkData(link: ILink) {
+    setLinksData([...linksData, link])
+  }
+
+  // ---------------------------------
+  // ======== Handle event
+  // ---------------------------------
+
+  function onAddNodeLink() {
     addNodeLink(createNodeData())
   }
 
@@ -241,10 +296,76 @@ const Chart = (props: any) => {
     addNodeLink(createNodeData(), input)
   }
 
+    // --------------------------------------------------------
+    // ======== Deeper nodes
+    // --------------------------------------------------------
+
+  async function getDistDependencies(node: INode) {
+    const childrenDependencies = await getDependencies(node.name.toString())
+    console.log('childrenDependencies of', node.name)
+    console.log(childrenDependencies)
+
+    const data = childrenDependencies.data
+
+    const currentVersion = data['dist-tags']['latest']
+    const packageInfo = data['versions'][currentVersion]
+    const dependencies = packageInfo.dependencies
+
+    console.log(dependencies)
+    const _dependencies = []
+
+    if (dependencies) {
+      for (const dependency in dependencies) {
+        _dependencies.push({
+          node: {
+            id: dependency,
+            version: dependencies[dependency],
+            level: nodeLevel,
+          },
+          link: {
+            id: node.id
+          }
+        })
+      }
+    }
+
+    return _dependencies
+  }
+
+  async function fetchChildrenNodes() {
+    const _nodesData = nodesData
+
+    let _depData: any = []
+
+    for (let i = 0; i < _nodesData.length; i++) {
+      try {
+        const node = _nodesData[i]
+        if (node.type === NODE_TYPE.DEPENDENCY && node.level === nodeLevel - 1) {
+          const _dependencies = await getDistDependencies(_nodesData[i])
+
+          _depData = _depData.concat(_dependencies)
+        }
+      } catch (e) {
+        console.log(e)
+      }
+    }
+
+    setDepData(_depData)
+    setNodeLevel(nodeLevel + 1)
+
+    if (nodeLevel === 4) {
+      isDone.current = true
+    }
+  }
+
+    // -----------------------------
+    // ======== Render
+    // -----------------------------
+
   return (
     <div ref={d3ContainerRef} style={{ overflow: 'hidden' }}>
       <button onClick={onReset}>Reset</button>
-      <button onClick={onAddNode}>Add</button>
+      <button onClick={onAddNodeLink}>Add</button>
 
       {/* <input type="number" onChange={onNodeInputChange} value={nodeInput}/> */}
       <input type="text" ref={nodeInput}/>

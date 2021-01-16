@@ -35,12 +35,24 @@ const Node = (props: any) => {
     nodes.current
         .append('circle')
       // .join('circle')
-        .attr('r', 5)
+        .attr('r', (d: any) => {
+          if (d.type === NODE_TYPE.ROOT) {
+            return 10
+          }
+          return 5
+        })
         .attr('fill', (d: any) => {
           if (d.type === NODE_TYPE.ROOT) {
             return '#0ef'
+          } else {
+            switch (d.level) {
+              case 1: return '#f3a';
+              case 2: return '#00f';
+              case 3: return '#0f0';
+              case 4: return '#ff0';
+              default: return '#fff;'
+            }
           }
-          return '#f0f'
         })
 
     nodes.current
