@@ -1,0 +1,2 @@
+export enum NODE_TYPE { ROOT, DEPENDENCY }
+export enum NODE_STATUS { VULNERABLE, CLEAN }

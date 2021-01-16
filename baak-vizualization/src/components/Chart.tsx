@@ -6,22 +6,19 @@ import Link from 'components/Link'
 
 import { queryVulnerability } from 'lib/query'
 import { getDependencies } from 'lib/api'
-import { TimeInterval } from 'd3'
 
-interface Link {
-  source: string
-  target: string
-  version: string
-}
-
-enum NODE_TYPE { ROOT, DEP }
+import { NODE_TYPE, NODE_STATUS } from 'types/index'
 
 const height: number = 600
 const width: number = 600
 
-
-
 let i = 3
+
+const mockNodesData: INode[] = [
+  { id: 1, type: NODE_TYPE.ROOT, status: NODE_STATUS.CLEAN, version: '', level: 0  },
+  { id: 2, type: NODE_TYPE.DEPENDENCY, status: NODE_STATUS.CLEAN, version: '', level: 1  },
+  { id: 3, type: NODE_TYPE.DEPENDENCY, status: NODE_STATUS.CLEAN, version: '', level: 1  },
+]
 
 const Chart = (props: any) => {
   const d3ContainerRef = useRef(null)
@@ -32,8 +29,8 @@ const Chart = (props: any) => {
   const zoom = useRef<any>()
   const nodeInput = useRef<any>()
 
-  const [nodesData, setNodesData] = useState( [{ id: 1 }, { id: 2 }, { id: 3 }] )
-  const [linksData, setLinksData] = useState( [{ source: 2, target: 1 }, { source: 3, target: 1 }] )
+  const [nodesData, setNodesData] = useState<INode[]>(mockNodesData)
+  const [linksData, setLinksData] = useState<ILink[]>( [{ source: 2, target: 1 }, { source: 3, target: 1 }] )
   const [depData, setDepData] = useState<any>([])
 
   const [nodes, setNodes] = useState<any>()
@@ -48,7 +45,7 @@ const Chart = (props: any) => {
 
   useEffect(() => {
     tick(simulation.current)
-  }, [nodes, links, nodesData, linksData])
+  }, [nodes, links])
 
   useEffect(() => {
     setupZoom()
@@ -62,32 +59,10 @@ const Chart = (props: any) => {
   }, [props.data])
 
   useEffect(() => {
-    setNodesData(
-      [
-        ...nodesData,
-        ...[
-          ...depData
-        ].map((item) => {
-          return {
-            id: item,
-          }
-        })
-      ]
-    )
-
-    setLinksData(
-      [
-        ...linksData,
-        ...[
-          ...depData
-        ].map((item) => {
-          return {
-            source: item,
-            target: 1,
-          }
-        })
-      ]
-    )
+    console.log('depData.length', depData.length)
+    if (depData.length > 0) {
+      animate()
+    }
   }, [depData])
 
   // Data change
@@ -95,7 +70,6 @@ const Chart = (props: any) => {
     if (data) {
       analyzePackageJson(data)
     }
-    console.log('!data', data)
   }
   // Create D3 element
   // function createNode(packageName: any, version: any) {
@@ -111,22 +85,7 @@ const Chart = (props: any) => {
   //   }
   // }
 
-  function addNode() {
-
-  }
-
-  function addLink() {
-
-  }
-
-  // Analyze package.json
-  async function analyzePackageJson(json: any) {
-    const dependencies = json.dependencies || {}
-
-    // Set loading progress to 0
-    // props.setProgress(0)
-    let _progress = 0
-
+  async function animate() {
     const ADD_NODE_SPEED = 1000
 
     // Gently add node/link
@@ -143,20 +102,30 @@ const Chart = (props: any) => {
       })
     }
 
-    const promises = []
+    const _depData = depData
+    const newDepData = _depData.splice(1)
+
+    await gentlyAddNodeLink(_depData[0])
+    setDepData(newDepData)
+  }
+
+  // Analyze package.json
+  async function analyzePackageJson(json: any) {
+    const dependencies = json.dependencies || {}
+
+    // Set loading progress to 0
+    // props.setProgress(0)
+    let _progress = 0
+
     const _data = []
 
     for (const dependency in dependencies) {
       _data.push(dependency)
-      // promises.push(gentlyAddNodeLink(dependency))
     }
 
-    // await Promise.all(promises)
     setDepData(_data)
-    // alert('done')
   }
 
-  // --------------------------------------------------------
   // --------------------------------------------------------
   // --------------------------------------------------------
 
@@ -171,6 +140,9 @@ const Chart = (props: any) => {
   //     clearInterval(interval.current)
   //   }
   // }, [nodes, links])
+
+  // --------------------------------------------------------
+  // --------------------------------------------------------
 
   function setupZoom() {
     zoom.current = d3.zoom<any, any>()
@@ -202,7 +174,7 @@ const Chart = (props: any) => {
   // Force Simulation
   function setupForceSimulation(_nodes: any, _links: any) {
     simulation.current = d3.forceSimulation(_nodes)
-      .force('charge', d3.forceManyBody().strength(-100))
+      .force('charge', d3.forceManyBody().strength(-300))
       .force('link', d3.forceLink(_links).id((d: any) => d.id))
       .force('x', d3.forceX())
       .force('y', d3.forceY())
@@ -246,13 +218,17 @@ const Chart = (props: any) => {
         // .attr('stroke', '#fff')
   }
 
-  function addNodeLink(source = ++i, target = 1) {
-    setNodesData([...nodesData, { id: source }])
-    setLinksData([...linksData, { source: source, target: target },])
+  function addNodeLink(source: INode, target: string | number = 1) {
+    setNodesData([...nodesData, source])
+    setLinksData([...linksData, { source: source.id, target: target }])
+  }
+
+  function createNodeData(id: string | number = ++i, version = '*', level = 1, type= NODE_TYPE.DEPENDENCY, status = NODE_STATUS.CLEAN): INode {
+    return ({ id: `${id}@${version}`, version, level, type, status })
   }
 
   function onAddNode() {
-    addNodeLink()
+    addNodeLink(createNodeData())
   }
 
   function onAddNodeInput() {
@@ -262,7 +238,7 @@ const Chart = (props: any) => {
       input = nodeInput.current.value
     }
 
-    addNodeLink(undefined, input)
+    addNodeLink(createNodeData(), input)
   }
 
   return (

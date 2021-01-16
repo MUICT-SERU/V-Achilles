@@ -25,7 +25,6 @@ function App() {
   // File Input Handler
   function onFileChange(file: any) {
     const fileReader = new FileReader()
-
     // On File Reader done
     fileReader.addEventListener('load', () => {
       // Convert text to JSON object
@@ -43,7 +42,10 @@ function App() {
 
     // Start read file as text
     fileReader.readAsText(file)
-    console.log(file.name)
+  }
+
+  function fetchNextNode() {
+    
   }
 
   return (

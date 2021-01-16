@@ -1,6 +1,8 @@
 import React, { useEffect, useRef } from 'react'
 import * as d3 from 'd3'
 
+import { NODE_TYPE } from 'types/index'
+
 const Node = (props: any) => {
   const ref = useRef(null)
   const groupElement = useRef(d3.select(ref.current))
@@ -11,9 +13,9 @@ const Node = (props: any) => {
     setupCircle(props.data)
 
     return () => {
-      // groupElement.current
-      //   .selectAll('g')
-      //   .remove()
+      nodes.current
+        .selectAll('circle, text')
+        .remove()
     }
   }, [props.data, props.simulation])
 
@@ -35,7 +37,7 @@ const Node = (props: any) => {
       // .join('circle')
         .attr('r', 5)
         .attr('fill', (d: any) => {
-          if (d.id === 1) {
+          if (d.type === NODE_TYPE.ROOT) {
             return '#0ef'
           }
           return '#f0f'
@@ -47,8 +49,8 @@ const Node = (props: any) => {
           .attr('x', 8)
           .attr('y', '0.31em')
           .attr('fill', '#fff')
-        .clone(true).lower()
-          .attr('fill', 'none')
+        // .clone(true).lower()
+        //   .attr('fill', 'none')
   }
 
   const drag = (simulation: any) => {

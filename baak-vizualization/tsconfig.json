@@ -20,6 +20,9 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
+    "typeRoots": [
+      "./src/types/**/*"
+    ],
     "paths": {
       "app/*": [
         "*"
