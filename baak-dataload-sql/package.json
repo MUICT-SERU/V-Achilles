@@ -5,6 +5,7 @@
   "repository": "https://github.com/ampere111/baak-dataload-sql.git",
   "license": "MIT",
   "scripts": {
+    "build": "tsc",
     "watch": "tsc -w",
     "dev": "nodemon dist/app.js",
     "start": "node dist/app.js"
