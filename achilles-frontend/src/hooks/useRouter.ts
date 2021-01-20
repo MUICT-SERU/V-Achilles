@@ -2,7 +2,7 @@ import { useHistory, useParams, useLocation } from "react-router-dom";
 
 const useRouter = () => {
   const history = useHistory();
-  const urlParams = useParams();
+  const urlParams: any = useParams();
   const location = useLocation();
 
   const goBack = () => history.goBack();

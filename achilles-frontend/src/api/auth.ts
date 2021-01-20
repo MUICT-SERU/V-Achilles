@@ -5,8 +5,7 @@ const auth = {
   loginWithGithub: async (data: string) =>
     await HttpUtil.post(ROUTE_API.login, { data }),
 
-  user: async (data: string) =>
-    await HttpUtil.get(`${ROUTE_API.user}?data=${data}`),
+  user: async () => await HttpUtil.get(`${ROUTE_API.user}`),
 };
 
 export default auth;

@@ -1,19 +1,11 @@
-import { useRef, useState, useEffect } from "react";
-import {
-  Box,
-  Link,
-  Grid,
-  Avatar,
-  CardMedia,
-  Typography,
-} from "@material-ui/core";
+import { useState, useRef, useEffect } from "react";
+import { Box, Grid, Avatar, CardMedia, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { Player } from "@lottiefiles/react-lottie-player";
-
-import Loading from "../../components/Loading";
-import { CyanButton } from "../../components/CustomButton";
+import GitHubLogin from "react-github-login";
 
 import { useDispatch, useSelector } from "react-redux";
+import Loading from "../../components/Loading";
 
 import { loginWithGithubRequest } from "../../redux/auth/action";
 import { loginWithGithubSelector } from "../../redux/auth/selector";
@@ -42,12 +34,18 @@ const useStyles = makeStyles((theme) => ({
   gitHub: {
     width: theme.spacing(3),
     height: theme.spacing(3),
+    marginRight: theme.spacing(2),
   },
   connectGithub: {
     color: "white",
-    height: "100%",
+    padding: theme.spacing(0.6, 2),
+    borderRadius: theme.spacing(10),
+    border: "none",
+    boxShadow: "0px 1px 7px 0px rgba(169,169,169,0.5)",
+    backgroundColor: "#65c8d0",
     "&:hover": {
-      textDecoration: "none",
+      backgroundColor: "rgb(101,200,208, 0.7)",
+      cursor: "pointer",
     },
   },
   rightContainer: {
@@ -59,7 +57,7 @@ const Login: React.FC = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const didMountRef = useRef(false);
-  const { goTo, location } = useRouter();
+  const { goTo } = useRouter();
 
   const [isLoading, setLoading] = useState(false);
 
@@ -68,26 +66,27 @@ const Login: React.FC = () => {
   );
 
   useEffect(() => {
-    const code: string = location.search.split("?code=")[1];
-
-    if (code) {
-      setLoading(true);
-      dispatch(loginWithGithubRequest(code));
-    }
-  }, [dispatch, location]);
-
-  useEffect(() => {
     // prevent running on initial mount
     if (didMountRef.current) {
       if (userData) {
         if (!isErrorLoginWithGithub) {
           setLoading(false);
-          goTo(ROUTE_PATH.projectList)();
+          goTo(ROUTE_PATH.root)();
         }
       }
     } else didMountRef.current = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userData]);
+
+  const onFailure = (response: any) => {
+    console.log("Login with github Fail", response);
+  };
+
+  const onSuccess = (response: any) => {
+    setLoading(true);
+    const { code } = response;
+    dispatch(loginWithGithubRequest(code));
+  };
 
   return (
     <>
@@ -110,28 +109,29 @@ const Login: React.FC = () => {
               <Typography variant="h3">Achilles</Typography>
               <Box textAlign="center" my={3}>
                 <Typography variant="h6">
-                  Connect your GitHub with
+                  Connect your GitHub with Achilles to
                   <br />
-                  Achilles to find vulnerabilities
+                  find security vulnerabilities in your project
                 </Typography>
               </Box>
-              <CyanButton
-                variant="contained"
-                startIcon={
-                  <Avatar
-                    src="/images/github.png"
-                    alt="Github Logo"
-                    className={classes.gitHub}
-                  />
+              <GitHubLogin
+                scope="repo"
+                redirectUri=""
+                clientId={process.env.REACT_APP_GITHUB_CLIENT_ID}
+                buttonText={
+                  <Box display="flex" flexDirection="row" alignItems="center">
+                    <Avatar
+                      src="/images/github.png"
+                      alt="Github Logo"
+                      className={classes.gitHub}
+                    />
+                    <Typography variant="body2">Connect with GitHub</Typography>
+                  </Box>
                 }
-              >
-                <Link
-                  href={ROUTE_PATH.githubAuthorize}
-                  className={classes.connectGithub}
-                >
-                  Connect with GitHub
-                </Link>
-              </CyanButton>
+                onSuccess={onSuccess}
+                onFailure={onFailure}
+                className={classes.connectGithub}
+              />
             </Box>
           </Grid>
           <Grid item className={classes.rightContainer}>

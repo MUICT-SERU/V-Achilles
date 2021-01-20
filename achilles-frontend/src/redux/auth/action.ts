@@ -29,9 +29,8 @@ export const loginWithGithubFailure = ({ userData }: any) => ({
 });
 
 // user information request
-export const userRequest = (data: string) => ({
+export const userRequest = () => ({
   type: AUTH_ACTION.USER_REQUEST,
-  payload: data,
 });
 
 export const userSuccess = ({ userData }: any) => ({

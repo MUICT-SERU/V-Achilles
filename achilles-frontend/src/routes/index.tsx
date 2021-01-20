@@ -21,7 +21,7 @@ const Routes: React.FC = () => {
   useEffect(() => {
     // Preventing user going back to login page after login
     if (isAuth() && location.pathname === "/login")
-      goTo(ROUTE_PATH.projectList)();
+      goTo(ROUTE_PATH.root)();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
