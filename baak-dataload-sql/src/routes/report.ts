@@ -1,28 +1,28 @@
 import express from "express";
 import passport from "../utils/passport";
-import Projects from "../controller/projects";
+import ReportController from "../controller/report";
 
 const router = express.Router();
 
+router.post(
+  "/",
+  passport.authenticate("jwt", { session: false }),
+  ReportController.createReport
+);
 router.get(
   "/",
   passport.authenticate("jwt", { session: false }),
-  Projects.getProjects
+  ReportController.getReportHistory
 );
 router.get(
-  "/search",
+  "/:reportId",
   passport.authenticate("jwt", { session: false }),
-  Projects.searchProjects
+  ReportController.getRepportById
 );
-router.get(
-  "/is-packge-json",
+router.delete(
+  "/:reportId",
   passport.authenticate("jwt", { session: false }),
-  Projects.isPackgeJson
-);
-router.get(
-  "/package-json-content",
-  passport.authenticate("jwt", { session: false }),
-  Projects.packageJsonContent
+  ReportController.deleteReportById
 );
 
 export default router;
