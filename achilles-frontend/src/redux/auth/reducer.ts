@@ -33,7 +33,6 @@ const reducer = (state = initialState, action: any) => {
     case AUTH_ACTION.USER_REQUEST:
       return StateUtil.setRequest("User", {
         ...state,
-        ...action.payload,
       });
     case AUTH_ACTION.USER_SUCCESS:
       return StateUtil.setSuccess("User", {

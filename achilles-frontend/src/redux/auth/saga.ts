@@ -31,10 +31,9 @@ function* loginWithGithub(action: any): any {
   }
 }
 
-function* user(action: any): any {
+function* user(): any {
   try {
-    const data = action.payload;
-    const response = yield call(AUTH_API.user, data);
+    const response = yield call(AUTH_API.user);
     const userData = response.data;
 
     yield put(userSuccess({ userData }));

@@ -1,15 +1,17 @@
 import React from "react";
-import Button from "@material-ui/core/Button";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
-import DialogTitle from "@material-ui/core/DialogTitle";
+import {
+  Dialog,
+  DialogTitle,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+} from "@material-ui/core";
+import { CyanButton, WhiteButton } from "../CustomButton";
 
 interface AlertDialogProps {
   open: boolean;
   title: string;
-  content: string;
+  content?: string;
   firstButton: { text: string; action: () => void };
   secondButton?: { text: string; action: () => void };
   handleClose?: () => void;
@@ -41,14 +43,14 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
         </DialogContent>
         <DialogActions>
           {firstButton && (
-            <Button onClick={firstButton.action} color="primary">
+            <WhiteButton onClick={firstButton.action}>
               {firstButton.text}
-            </Button>
+            </WhiteButton>
           )}
           {secondButton && (
-            <Button onClick={secondButton.action} color="primary">
+            <CyanButton onClick={secondButton.action} color="primary">
               {secondButton.text}
-            </Button>
+            </CyanButton>
           )}
         </DialogActions>
       </Dialog>

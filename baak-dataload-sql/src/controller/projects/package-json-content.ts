@@ -1,10 +1,10 @@
 import axios from "axios";
+import { UserInterface } from "../../models/user";
 
 interface packageJsonContentReq {
+  user: UserInterface;
   query: {
-    access_token: string;
-    selectedRepo: string;
-    ownerName: string;
+    packageJsonUrl: string;
   };
 }
 
@@ -14,18 +14,12 @@ const packageJsonContent = async (
   _: any
 ) => {
   try {
-    const { access_token, ownerName, selectedRepo } = req.query;
-
-    const packageJsonContentUrl = await getJsonContentUrl(
-      ownerName,
-      access_token,
-      selectedRepo
-    );
+    const { packageJsonUrl } = req.query;
 
     await axios
-      .get(packageJsonContentUrl, {
+      .get(packageJsonUrl, {
         headers: {
-          Authorization: `token ${access_token}`,
+          Authorization: `token ${req.user.access_token}`,
           Accept: "application/vnd.github.VERSION.raw",
         },
       })
@@ -42,34 +36,6 @@ const packageJsonContent = async (
     console.log(err);
     return res.status(500).json({ message: "Oops! Something went wrong!" });
   }
-};
-
-const getJsonContentUrl = async (
-  user: string,
-  access_token: string,
-  repoName: string
-) => {
-  const response = await axios.get(
-    `https://api.github.com/search/code?q=user:${user}+dependencies+repo:${user}/${repoName}+filename:package.json`,
-    {
-      headers: {
-        Authorization: `token ${access_token}`,
-      },
-    }
-  );
-
-  const total_count = response.data.total_count;
-
-  if (total_count > 0) {
-    const contents_url = response.data.items[0].repository.contents_url.split(
-      "{+path}"
-    )[0];
-    const packageJson_path = response.data.items[0].path;
-
-    return contents_url + packageJson_path;
-  }
-
-  return "";
 };
 
 export default packageJsonContent;

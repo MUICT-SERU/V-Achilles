@@ -1,29 +1,16 @@
-import { getUser } from "../../utils/getUser";
+import { UserInterface } from "../../models/user";
 
-interface userReq {
-  query: {
-    data: string;
-  };
+interface UserData {
+  user: UserInterface;
 }
 
-interface Response {
-  username: string;
-  userProfile: string;
-}
-
-const user = async (req: userReq, res: any, _: any) => {
-  const { data } = req.query;
-
+const user = async (req: UserData, res: any, _: any) => {
   try {
-    const userData = await getUser(data);
-
-    if (userData) {
-      const response: Response = {
-        username: userData.data.login,
-        userProfile: userData.data.avatar_url,
-      };
-      return res.status(200).send({ data: response });
-    } else return res.status(401).send({ message: "User login is expired" });
+    res.status(200).json({
+      username: req.user.username,
+      profilePicture: req.user.profilePicture,
+      access_token: req.user.access_token,
+    });
   } catch (err) {
     console.log(err);
     return res.status(500).json({ message: "Oops! Something went wrong!" });
