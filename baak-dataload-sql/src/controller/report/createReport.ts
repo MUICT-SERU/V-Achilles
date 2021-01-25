@@ -1,5 +1,5 @@
 import { UserInterface } from "../../models/user";
-import ReportModel from "../../models/report";
+import ReportModel, { ReportInterface } from "../../models/report";
 
 interface CreateReportReq {
   user: UserInterface;
@@ -16,9 +16,14 @@ const createReport = async (req: CreateReportReq, res: any, _next: any) => {
     };
 
     const newReport = new ReportModel(reportObj);
-    await newReport.save();
+    const savedReport: ReportInterface = await newReport.save();
 
-    res.status(200).json({ message: "Create report successfully" });
+    res
+      .status(200)
+      .json({
+        reportId: savedReport._id,
+        message: "Create report successfully",
+      });
   } catch (err) {
     console.log(err);
     return res.status(500).json({ message: "Opps! Something went wrong" });
