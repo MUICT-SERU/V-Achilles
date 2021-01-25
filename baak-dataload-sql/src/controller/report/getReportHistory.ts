@@ -13,7 +13,7 @@ const getReportHistory = async (
   try {
     const reportHistory: ReportInterface[] | null = await ReportModel.find({
       user: req.user._id,
-    });
+    }).sort("-createdAt");
     res.status(200).json({ reportHistory: reportHistory ? reportHistory : [] });
   } catch (err) {
     console.error(err);

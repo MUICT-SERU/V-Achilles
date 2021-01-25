@@ -18,9 +18,10 @@ import PersonSharpIcon from "@material-ui/icons/PersonSharp";
 
 import swal from "sweetalert";
 import useDebounce from "../../hooks/useDebounce";
+import useRouter from "../../hooks/useRouter";
 
 import HttpUtil from "../../utils/http-util";
-import { ROUTE_API } from "../../utils/route-util";
+import { ROUTE_API, ROUTE_PATH } from "../../utils/route-util";
 
 import Loading from "../../components/Loading";
 import { CyanButton, DisabledButton } from "../../components/CustomButton";
@@ -90,7 +91,7 @@ const useStyles = makeStyles((theme) => ({
 
 const ProjectList: React.FC = () => {
   const classes = useStyles();
-  const access_token = localStorage.getItem("token") || "";
+  const { goTo } = useRouter();
 
   const [open, setOpen] = useState(false); // open modal for pacakge json list
   const [isLoading, setLoading] = useState(false);
@@ -111,9 +112,7 @@ const ProjectList: React.FC = () => {
   useEffect(() => {
     setLoading(true);
     if (debounceSearch) {
-      HttpUtil.get(
-        `${ROUTE_API.searchProject}?token=${access_token}&repoName=${debounceSearch}`
-      )
+      HttpUtil.get(`${ROUTE_API.searchProject}?repoName=${debounceSearch}`)
         .then((response) => {
           const projects = response.data;
           setUserProjects(projects.userProjects);
@@ -124,7 +123,7 @@ const ProjectList: React.FC = () => {
           setLoading(false);
         });
     } else {
-      HttpUtil.get(`${ROUTE_API.project}?data=${access_token}`)
+      HttpUtil.get(`${ROUTE_API.projects}`)
         .then((response) => {
           const projects = response.data;
           setAllProjects(projects.allProjects);
@@ -137,7 +136,7 @@ const ProjectList: React.FC = () => {
           setLoading(false);
         });
     }
-  }, [access_token, debounceSearch]);
+  }, [debounceSearch]);
 
   const onSelectedProject = (event: any) => {
     const value = event.target.value;
@@ -153,7 +152,7 @@ const ProjectList: React.FC = () => {
     const user = allProjects[index].ownerName;
 
     HttpUtil.get(
-      `${ROUTE_API.isPackgeJson}?access_token=${access_token}&repoName=${selectedProject}&user=${user}`
+      `${ROUTE_API.isPackgeJson}?&repoName=${selectedProject}&user=${user}`
     )
       .then((response) => {
         setPackgeJsonLoading(false);
@@ -182,15 +181,17 @@ const ProjectList: React.FC = () => {
 
   const onGetPackageJsonContent = (url: string) => {
     HttpUtil.get(
-      `${
-        ROUTE_API.packageJsonContent
-      }?access_token=${access_token}&packageJsonUrl=${url}${
+      `${ROUTE_API.packageJsonContent}?packageJsonUrl=${url}${
         selectedJsonPath ? selectedJsonPath : "package.json"
       }`
     )
       .then((response) => {
-        console.log(response.data);
         setPackgeJsonLoading(false);
+        localStorage.setItem(
+          "packageJsonContent",
+          JSON.stringify(response.data.packageJson)
+        );
+        goTo(ROUTE_PATH.visualization)();
       })
       .catch((err) => {
         console.log(err);

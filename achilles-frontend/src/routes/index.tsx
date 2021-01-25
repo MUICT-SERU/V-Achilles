@@ -2,15 +2,16 @@ import { useEffect } from "react";
 import { lazy, Suspense } from "react";
 import { Route, Switch } from "react-router-dom";
 
-import { ROUTE_PATH } from "../utils/route-util";
-import ProtectedRoute from "../utils/route-protected";
+import { ROUTE_PATH } from "utils/route-util";
+import ProtectedRoute from "utils/route-protected";
 
-import useAuth from "../hooks/useAuth";
-import useRouter from "../hooks/useRouter";
+import useAuth from "hooks/useAuth";
+import useRouter from "hooks/useRouter";
 
-const Loading = lazy(() => import("../components/Loading"));
+const Loading = lazy(() => import("components/Loading"));
 
-const Login = lazy(() => import("../pages/Login"));
+const Login = lazy(() => import("pages/Login"));
+const Visualization = lazy(() => import("pages/Visualization"));
 
 const PrivateRoute = lazy(() => import("./private"));
 

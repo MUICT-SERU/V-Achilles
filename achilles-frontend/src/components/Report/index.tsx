@@ -1,6 +1,11 @@
+import { createRef } from "react";
 import { useState, useEffect } from "react";
 import { Box, Grid, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import SystemUpdateAltRoundedIcon from "@material-ui/icons/SystemUpdateAltRounded";
+
+import { CyanButton } from "../../components/CustomButton";
+import { savePDF } from "@progress/kendo-react-pdf";
 
 import Summary from "./Summary";
 import Vulnerability from "./Vulnerability";
@@ -24,7 +29,7 @@ const useStyles = makeStyles((theme) => ({
   },
   circle: {
     border: "2px solid rgb(128, 128, 128, 0.8)",
-    borderRadius: "50%",
+    borderRadius: "100%",
     width: 145,
     height: 145,
     display: "flex",
@@ -48,10 +53,18 @@ const useStyles = makeStyles((theme) => ({
     color: lowSeverityColor,
     textAlign: "center",
   },
+  download: {
+    marginRight: theme.spacing(1.5),
+  },
+  achilles: {
+    width: 100,
+    height: 100,
+  },
 }));
 
 const Report: React.FC<{ data: ReportInterface }> = ({ data }) => {
   const classes = useStyles();
+  const pdfRef = createRef<HTMLDivElement>();
   const [severities, setSeverities] = useState({
     high: 0,
     moderate: 0,
@@ -74,46 +87,68 @@ const Report: React.FC<{ data: ReportInterface }> = ({ data }) => {
     setSeverities({ high, moderate, low });
   }, [data]);
 
+  const downloadDocument = () => {
+    const input: any = pdfRef.current;
+
+    savePDF(input, {
+      paperSize: "A4",
+      fileName: `${data.repository_name}-achilles-report`,
+      margin: "1cm",
+    });
+  };
+
+  const renderReport = (
+    <div ref={pdfRef}>
+      <Typography variant="h5" color="primary">
+        {data.username}
+      </Typography>
+      <Typography variant="h5" color="primary">
+        {data.repository_name}
+      </Typography>
+      <Box my={4}>
+        <Grid container>
+          <Grid item xs={4} className={classes.severityItem}>
+            <Box className={classes.circle}>
+              <Typography variant="h6" className={classes.highSeverityText}>
+                HIGH <br /> {severities.high}
+              </Typography>
+            </Box>
+          </Grid>
+          <Grid item xs={4} className={classes.severityItem}>
+            <Box className={classes.circle}>
+              <Typography variant="h6" className={classes.moderateSeverityText}>
+                MODERATE <br /> {severities.moderate}
+              </Typography>
+            </Box>
+          </Grid>
+          <Grid item xs={4} className={classes.severityItem}>
+            <Box className={classes.circle}>
+              <Typography variant="h6" className={classes.lowSeverityText}>
+                LOW <br /> {severities.low}
+              </Typography>
+            </Box>
+          </Grid>
+        </Grid>
+      </Box>
+      <Summary {...{ items: data.items }} />
+      <Box my={5} />
+      <Vulnerability {...{ items: data.items }} />
+    </div>
+  );
+
   return (
     <>
       <Box className={classes.container}>
-        <Typography variant="h5" color="primary">
-          {data.username}
-        </Typography>
-        <Typography variant="h5" color="primary">
-          {data.repository_name}
-        </Typography>
-        <Box my={4}>
-          <Grid container>
-            <Grid item xs={4} className={classes.severityItem}>
-              <Box className={classes.circle}>
-                <Typography variant="h6" className={classes.highSeverityText}>
-                  HIGH <br /> {severities.high}
-                </Typography>
-              </Box>
-            </Grid>
-            <Grid item xs={4} className={classes.severityItem}>
-              <Box className={classes.circle}>
-                <Typography
-                  variant="h6"
-                  className={classes.moderateSeverityText}
-                >
-                  MODERATE <br /> {severities.moderate}
-                </Typography>
-              </Box>
-            </Grid>
-            <Grid item xs={4} className={classes.severityItem}>
-              <Box className={classes.circle}>
-                <Typography variant="h6" className={classes.lowSeverityText}>
-                  LOW <br /> {severities.low}
-                </Typography>
-              </Box>
-            </Grid>
-          </Grid>
+        {renderReport}
+        <Box textAlign="center" mt={4} onClick={downloadDocument}>
+          <CyanButton variant="contained">
+            <SystemUpdateAltRoundedIcon
+              fontSize="small"
+              className={classes.download}
+            />
+            <Typography variant="body1">Download Report</Typography>
+          </CyanButton>
         </Box>
-        <Summary {...{ items: data.items }} />
-        <Box my={5} />
-        <Vulnerability {...{ items: data.items }} />
       </Box>
     </>
   );
