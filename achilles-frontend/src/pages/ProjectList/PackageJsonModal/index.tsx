@@ -17,7 +17,7 @@ import {
   WhiteButton,
   CyanButton,
   DisabledButton,
-} from "../../../components/CustomButton";
+} from "components/CustomButton";
 
 const useStyles = makeStyles((theme) => ({
   modal: {

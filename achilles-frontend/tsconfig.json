@@ -19,7 +19,29 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "noImplicitAny": false
+    "noImplicitAny": false,
+    "baseUrl": "./src",
+    "typeRoots": [
+      "./src/types/**/*"
+    ],
+    "paths": {
+      "app/*": ["*"],
+      "assets/*": ["assets/*"],
+      "core/*": ["core/*"],
+      "components/*": ["components/*"],
+      "containers/*": ["containers/*"],
+      "ducks/*": ["redux/modules/*"],
+      "hooks/*": ["hooks/*"],
+      "lib/*": ["lib/*"],
+      "pages/*": ["pages/*"],
+      "routes/*": ["routes/*"],
+      "styled/*": ["components/styled/*"],
+      "styles/*": ["styles/*"],
+      "themes/*": ["themes/*"],
+      "types/*": ["types/*"],
+      "utils/*": ["utils/*"],
+      "vars/*": ["vars/*"]
+    }
   },
   "include": [
     "src"
