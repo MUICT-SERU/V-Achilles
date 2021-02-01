@@ -2,8 +2,11 @@ import "dotenv-safe/config";
 
 import cors from "cors";
 import path from "path";
+import morgan from "morgan";
 import express from "express";
 import mongoose from "mongoose";
+
+import passport from "./utils/passport";
 
 import Auth from "./routes/auth";
 import IndexRouter from "./routes/index";
@@ -23,9 +26,12 @@ mongoose
 const app = express();
 
 app.use(cors());
+app.use(morgan('combined'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
+
+app.use(passport.initialize());
 
 app.use("/", IndexRouter);
 app.use("/api/v1/auth", Auth);

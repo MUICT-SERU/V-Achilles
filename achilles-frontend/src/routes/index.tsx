@@ -11,7 +11,6 @@ import useRouter from "hooks/useRouter";
 const Loading = lazy(() => import("components/Loading"));
 
 const Login = lazy(() => import("pages/Login"));
-const Visualization = lazy(() => import("pages/Visualization"));
 
 const PrivateRoute = lazy(() => import("./private"));
 

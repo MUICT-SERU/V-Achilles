@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
+import { animateScroll as scroll } from 'react-scroll';
 import {
   Box,
   Grid,
@@ -6,27 +7,29 @@ import {
   Radio,
   Divider,
   InputBase,
+  IconButton,
   Typography,
   RadioGroup,
   FormControlLabel,
-} from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+} from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 
-import SearchIcon from "@material-ui/icons/Search";
-import LockIcon from "@material-ui/icons/Lock";
-import PersonSharpIcon from "@material-ui/icons/PersonSharp";
+import SearchIcon from '@material-ui/icons/Search';
+import LockIcon from '@material-ui/icons/Lock';
+import PersonSharpIcon from '@material-ui/icons/PersonSharp';
+import ExpandMoreRoundedIcon from '@material-ui/icons/ExpandMoreRounded';
 
-import swal from "sweetalert";
-import useDebounce from "../../hooks/useDebounce";
-import useRouter from "../../hooks/useRouter";
+import swal from 'sweetalert';
+import useDebounce from '../../hooks/useDebounce';
+import useRouter from '../../hooks/useRouter';
 
-import HttpUtil from "../../utils/http-util";
-import { ROUTE_API, ROUTE_PATH } from "../../utils/route-util";
+import HttpUtil from '../../utils/http-util';
+import { ROUTE_API, ROUTE_PATH } from '../../utils/route-util';
 
-import Loading from "../../components/Loading";
-import { CyanButton, DisabledButton } from "../../components/CustomButton";
+import Loading from '../../components/Loading';
+import { CyanButton, DisabledButton } from '../../components/CustomButton';
 
-import PackageJsonModal from "./PackageJsonModal";
+import PackageJsonModal from './PackageJsonModal';
 
 interface Project {
   ownerName: string;
@@ -43,33 +46,33 @@ interface ContributeProject {
 const useStyles = makeStyles((theme) => ({
   container: {
     padding: theme.spacing(5, 20),
-    [theme.breakpoints.down("md")]: {
+    [theme.breakpoints.down('md')]: {
       padding: theme.spacing(5, 10),
     },
-    [theme.breakpoints.down("xs")]: {
+    [theme.breakpoints.down('xs')]: {
       padding: theme.spacing(5, 3),
     },
   },
   searchContainer: {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    width: "auto",
-    border: "2px solid rgb(128, 128, 128, 0.5)",
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: 'auto',
+    border: '2px solid rgb(128, 128, 128, 0.5)',
     borderRadius: 50,
-    justifyContent: "space-between",
+    justifyContent: 'space-between',
     padding: theme.spacing(1, 3),
     margin: theme.spacing(2, 0),
   },
   inputRoot: {
-    color: "inherit",
+    color: 'inherit',
     flex: 1,
   },
   inputInput: {
-    width: "100%",
+    width: '100%',
   },
   paperContainer: {
-    boxShadow: "0px 1px 5px 0px rgba(169,169,169,0.5)",
+    boxShadow: '0px 1px 5px 0px rgba(169,169,169,0.5)',
     padding: theme.spacing(2, 2),
     borderRadius: theme.spacing(2),
     marginTop: theme.spacing(5),
@@ -87,6 +90,17 @@ const useStyles = makeStyles((theme) => ({
     width: 20,
     height: 20,
   },
+  toBottom: {
+    zIndex: 2,
+    position: 'fixed',
+    bottom: '2vh',
+    backgroundColor: '#DCDCDC',
+    color: '#000',
+    '&:hover, &.Mui-focusVisible': {
+      transition: '0.3s',
+    },
+    right: '2%',
+  },
 }));
 
 const ProjectList: React.FC = () => {
@@ -95,19 +109,48 @@ const ProjectList: React.FC = () => {
 
   const [open, setOpen] = useState(false); // open modal for pacakge json list
   const [isLoading, setLoading] = useState(false);
-  const [searchRepo, setSearchRepo] = useState("");
+  const [searchRepo, setSearchRepo] = useState('');
   const [isPackgeJsonLoading, setPackgeJsonLoading] = useState(false);
 
-  const [selectedProject, setSelectedProject] = useState("");
-  const [selectedJsonPath, setSelectedJsonPath] = useState("");
+  const [selectedProject, setSelectedProject] = useState('');
+  const [selectedJsonPath, setSelectedJsonPath] = useState('');
 
   const [paths, setPaths] = useState([]); // path for package json content
-  const [packageJsonUrl, setPackgeJsonUrl] = useState("");
+  const [packageJsonUrl, setPackgeJsonUrl] = useState('');
   const [allProjects, setAllProjects] = useState<Project[]>([]);
   const [userProjects, setUserProjects] = useState([]);
   const [contributeProjects, setContributeProjects] = useState([]);
 
+  const [showArrow, setShowArrow] = useState(false);
+
   const debounceSearch = useDebounce(searchRepo, 500);
+
+  const onScroll = () => {
+    const windowHeight =
+      'innerHeight' in window
+        ? window.innerHeight
+        : document.documentElement.offsetHeight;
+    const body = document.body;
+    const html = document.documentElement;
+    const docHeight = Math.max(
+      body.scrollHeight,
+      body.offsetHeight,
+      html.clientHeight,
+      html.scrollHeight,
+      html.offsetHeight
+    );
+    const windowBottom = windowHeight + window.pageYOffset;
+    if (windowBottom >= docHeight) {
+      setShowArrow(false);
+    } else {
+      setShowArrow(true);
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -117,6 +160,7 @@ const ProjectList: React.FC = () => {
           const projects = response.data;
           setUserProjects(projects.userProjects);
           setLoading(false);
+          onScroll();
         })
         .catch((error) => {
           console.log(error);
@@ -130,6 +174,7 @@ const ProjectList: React.FC = () => {
           setUserProjects(projects.userProjects);
           setContributeProjects(projects.contributeProjects);
           setLoading(false);
+          onScroll();
         })
         .catch((error) => {
           console.log(error);
@@ -141,7 +186,7 @@ const ProjectList: React.FC = () => {
   const onSelectedProject = (event: any) => {
     const value = event.target.value;
     setSelectedProject(value);
-    setSelectedJsonPath("");
+    setSelectedJsonPath('');
   };
 
   const onFindVulnerabilities = () => {
@@ -158,9 +203,9 @@ const ProjectList: React.FC = () => {
         setPackgeJsonLoading(false);
         if (!response.data.isPackgeJson) {
           swal(
-            "Sorry!",
-            "This repository is not allowed to analyze. Please select only the npm project that have package.json file",
-            "error"
+            'Sorry!',
+            'This repository is not allowed to analyze. Please select only the npm project that have package.json file',
+            'error'
           );
         } else {
           const packgeJsonUrls = response.data.packgeJsonUrls;
@@ -182,14 +227,18 @@ const ProjectList: React.FC = () => {
   const onGetPackageJsonContent = (url: string) => {
     HttpUtil.get(
       `${ROUTE_API.packageJsonContent}?packageJsonUrl=${url}${
-        selectedJsonPath ? selectedJsonPath : "package.json"
+        selectedJsonPath ? selectedJsonPath : 'package.json'
       }`
     )
       .then((response) => {
         setPackgeJsonLoading(false);
         localStorage.setItem(
-          "packageJsonContent",
-          JSON.stringify(response.data.packageJson)
+          'packageJsonContent',
+          JSON.stringify({
+            repo: selectedProject,
+            packageJson: response.data.packageJson,
+            jsonPath: selectedJsonPath,
+          })
         );
         goTo(ROUTE_PATH.visualization)();
       })
@@ -206,7 +255,7 @@ const ProjectList: React.FC = () => {
   };
 
   const cancelButton = () => {
-    setSelectedJsonPath("");
+    setSelectedJsonPath('');
     setOpen(false);
   };
 
@@ -227,7 +276,7 @@ const ProjectList: React.FC = () => {
                     {project.privateProject ? (
                       <LockIcon color="primary" className={classes.lockIcon} />
                     ) : (
-                      ""
+                      ''
                     )}
                   </Box>
                 }
@@ -264,7 +313,7 @@ const ProjectList: React.FC = () => {
           onChange={onSelectedProject}
         >
           {isLoading ? (
-            ""
+            ''
           ) : (
             <Paper elevation={0} className={classes.paperContainer}>
               <Box textAlign="center">
@@ -333,7 +382,7 @@ const ProjectList: React.FC = () => {
                           {index < contributeProjects.length - 1 ? (
                             <Divider />
                           ) : (
-                            ""
+                            ''
                           )}
                         </Box>
                       );
@@ -343,17 +392,17 @@ const ProjectList: React.FC = () => {
               </Box>
             </Paper>
           ) : (
-            ""
+            ''
           )}
         </RadioGroup>
         {isLoading ||
         (userProjects.length <= 0 && contributeProjects.length <= 0) ? (
-          ""
+          ''
         ) : !isLoading &&
           debounceSearch &&
           userProjects.length <= 0 &&
           !selectedProject ? (
-          ""
+          ''
         ) : (
           <Box textAlign="center" mt={4}>
             {!selectedProject ? (
@@ -368,6 +417,18 @@ const ProjectList: React.FC = () => {
           </Box>
         )}
       </Box>
+
+      {/* to bottom arrow */}
+      {showArrow ? (
+        <IconButton
+          className={classes.toBottom}
+          onClick={() => scroll.scrollToBottom({ smooth: true })}
+        >
+          <ExpandMoreRoundedIcon fontSize="large" />
+        </IconButton>
+      ) : (
+        ''
+      )}
 
       <PackageJsonModal
         {...{

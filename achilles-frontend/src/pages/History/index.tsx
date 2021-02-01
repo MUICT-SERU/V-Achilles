@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 import {
   Box,
   Grid,
@@ -8,46 +8,47 @@ import {
   Hidden,
   Typography,
   IconButton,
-} from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+} from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 
-import InsertDriveFileIcon from "@material-ui/icons/InsertDriveFile";
-import DeleteForeverRoundedIcon from "@material-ui/icons/DeleteForeverRounded";
+import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
+import DeleteForeverRoundedIcon from '@material-ui/icons/DeleteForeverRounded';
 
-import moment from "moment";
-import Loading from "../../components/Loading";
-import AlertDialog from "../../components/AlertDialog";
+import moment from 'moment';
+import Loading from '../../components/Loading';
+import AlertDialog from '../../components/AlertDialog';
 
-import { ROUTE_API, ROUTE_PATH } from "../../utils/route-util";
-import HttpUtil from "../../utils/http-util";
-import { item } from "../../utils/report-interface";
+import { ROUTE_API, ROUTE_PATH } from '../../utils/route-util';
+import HttpUtil from '../../utils/http-util';
+import { item } from '../../utils/report-interface';
 import {
-  highSeverityColor,
-  moderateSeverityColor,
   lowSeverityColor,
-} from "../../utils/severityColor";
+  highSeverityColor,
+  criticalSeverityColor,
+  moderateSeverityColor,
+} from '../../utils/severityColor';
 
-import useRouter from "../../hooks/useRouter";
+import useRouter from '../../hooks/useRouter';
 
 const useStyles = makeStyles((theme) => ({
   container: {
     margin: theme.spacing(5, 8),
-    [theme.breakpoints.down("sm")]: {
+    [theme.breakpoints.down('sm')]: {
       margin: theme.spacing(2, 3),
     },
   },
   paperContainer: {
-    boxShadow: "0px 1px 4px 0px rgba(169,169,169,0.3)",
+    boxShadow: '0px 1px 4px 0px rgba(169,169,169,0.3)',
     padding: theme.spacing(1.5, 4),
     borderRadius: theme.spacing(2),
     marginBottom: theme.spacing(2),
-    [theme.breakpoints.down("sm")]: {
+    [theme.breakpoints.down('sm')]: {
       padding: theme.spacing(1.5, 2),
     },
   },
   gridButton: {
-    "&:hover": {
-      cursor: "pointer",
+    '&:hover': {
+      cursor: 'pointer',
     },
   },
   fileIcon: {
@@ -58,7 +59,17 @@ const useStyles = makeStyles((theme) => ({
     height: 30,
   },
   trashContainer: {
-    textAlign: "right",
+    textAlign: 'right',
+  },
+  noneSeverityChip: {
+    marginRight: theme.spacing(1),
+    borderColor: 'rgb(128, 128, 128, 0.5)',
+    color: 'rgb(128, 128, 128, 0.5)',
+  },
+  criticalSeverityChip: {
+    marginRight: theme.spacing(1),
+    borderColor: criticalSeverityColor,
+    color: criticalSeverityColor,
   },
   highSeverityChip: {
     marginRight: theme.spacing(1),
@@ -72,24 +83,37 @@ const useStyles = makeStyles((theme) => ({
   },
   lowSeverityChip: {
     borderColor: lowSeverityColor,
+    marginRight: theme.spacing(1),
     color: lowSeverityColor,
+  },
+  avatarCritical: {
+    backgroundColor: criticalSeverityColor,
+    '&.MuiChip-avatar': {
+      color: '#ffffff',
+    },
   },
   avatarHigh: {
     backgroundColor: highSeverityColor,
-    "&.MuiChip-avatar": {
-      color: "#ffffff",
+    '&.MuiChip-avatar': {
+      color: '#ffffff',
     },
   },
   avatarMedium: {
     backgroundColor: moderateSeverityColor,
-    "&.MuiChip-avatar": {
-      color: "#ffffff",
+    '&.MuiChip-avatar': {
+      color: '#ffffff',
     },
   },
   avatarLow: {
     backgroundColor: lowSeverityColor,
-    "&.MuiChip-avatar": {
-      color: "#ffffff",
+    '&.MuiChip-avatar': {
+      color: '#ffffff',
+    },
+  },
+  avatarNone: {
+    backgroundColor: 'rgb(128, 128, 128, 0.5)',
+    '&.MuiChip-avatar': {
+      color: '#ffffff',
     },
   },
 }));
@@ -99,7 +123,7 @@ const History: React.FC = () => {
   const { goTo } = useRouter();
 
   const [open, setOpen] = useState(false);
-  const [deleteId, setDeleteId] = useState(""); // report id for deletion
+  const [deleteId, setDeleteId] = useState(''); // report id for deletion
   const [isLoading, setLoading] = useState(false);
   const [reportHistory, setReportHistory] = useState([]);
 
@@ -126,17 +150,17 @@ const History: React.FC = () => {
   };
 
   const onCancelDelete = () => {
-    setDeleteId("");
+    setDeleteId('');
     setOpen(false);
   };
 
   const onDelete = () => {
     HttpUtil.delete(`${ROUTE_API.reports}/${deleteId}`)
-      .then((response) => {
+      .then((_response) => {
         setReportHistory((prevState) =>
           prevState.filter((item: { _id: string }) => item._id !== deleteId)
         );
-        setDeleteId("");
+        setDeleteId('');
         setOpen(false);
       })
       .catch((error) => {
@@ -147,16 +171,18 @@ const History: React.FC = () => {
 
   const renderHistoryList = () => {
     return reportHistory.map((report: any, index: number) => {
-      let high = 0,
+      let critical = 0,
+        high = 0,
         moderate = 0,
         low = 0;
 
       report.reportDetail.items.forEach((item: item) => {
         const severity = item.severity;
 
-        if (severity === "HIGH") high++;
-        else if (severity === "MODERATE") moderate++;
-        else if (severity === "LOW") low++;
+        if (severity === 'CRITICAL') critical++;
+        else if (severity === 'HIGH') high++;
+        else if (severity === 'MODERATE') moderate++;
+        else if (severity === 'LOW') low++;
       });
 
       return (
@@ -187,7 +213,7 @@ const History: React.FC = () => {
                 className={classes.gridButton}
               >
                 <Typography variant="body1" noWrap>
-                  {moment(report.createdAt).format("DD-MM-YYYY hh:mm A")}
+                  {moment(report.createdAt).format('DD-MM-YYYY hh:mm A')}
                 </Typography>
               </Grid>
             </Hidden>
@@ -202,23 +228,78 @@ const History: React.FC = () => {
                 <Chip
                   variant="outlined"
                   size="small"
+                  label={critical}
+                  avatar={
+                    <Avatar
+                      className={
+                        critical > 0
+                          ? classes.avatarCritical
+                          : classes.avatarNone
+                      }
+                    >
+                      C
+                    </Avatar>
+                  }
+                  className={
+                    critical > 0
+                      ? classes.criticalSeverityChip
+                      : classes.noneSeverityChip
+                  }
+                />
+                <Chip
+                  variant="outlined"
+                  size="small"
                   label={high}
-                  avatar={<Avatar className={classes.avatarHigh}>H</Avatar>}
-                  className={classes.highSeverityChip}
+                  avatar={
+                    <Avatar
+                      className={
+                        high > 0 ? classes.avatarHigh : classes.avatarNone
+                      }
+                    >
+                      H
+                    </Avatar>
+                  }
+                  className={
+                    high > 0
+                      ? classes.highSeverityChip
+                      : classes.noneSeverityChip
+                  }
                 />
                 <Chip
                   variant="outlined"
                   size="small"
                   label={moderate}
-                  avatar={<Avatar className={classes.avatarMedium}>M</Avatar>}
-                  className={classes.moderateSeverityChip}
+                  avatar={
+                    <Avatar
+                      className={
+                        moderate > 0 ? classes.avatarMedium : classes.avatarNone
+                      }
+                    >
+                      M
+                    </Avatar>
+                  }
+                  className={
+                    moderate > 0
+                      ? classes.moderateSeverityChip
+                      : classes.noneSeverityChip
+                  }
                 />
                 <Chip
                   variant="outlined"
                   size="small"
                   label={low}
-                  avatar={<Avatar className={classes.avatarLow}>L</Avatar>}
-                  className={classes.lowSeverityChip}
+                  avatar={
+                    <Avatar
+                      className={
+                        low > 0 ? classes.avatarLow : classes.avatarNone
+                      }
+                    >
+                      L
+                    </Avatar>
+                  }
+                  className={
+                    low > 0 ? classes.lowSeverityChip : classes.noneSeverityChip
+                  }
                 />
               </Box>
             </Grid>
@@ -262,9 +343,9 @@ const History: React.FC = () => {
       <AlertDialog
         {...{
           open,
-          title: "Do you really want to delete this report?",
-          firstButton: { text: "No", action: onCancelDelete },
-          secondButton: { text: "Yes", action: onDelete },
+          title: 'Do you really want to delete this report?',
+          firstButton: { text: 'No', action: onCancelDelete },
+          secondButton: { text: 'Yes', action: onDelete },
         }}
       />
     </>

@@ -4,20 +4,8 @@ interface IReport {
   items: IItem[];
 }
 
-interface IItem {
-  package: {
-    name: string;
-  };
+interface IItem extends ISecurityVulnerability {
   chaining: IChaining[];
-  firstPatchedVersion: {
-    identifier: string;
-  };
-  severity: string;
-  vulnerableVersionRange: string;
-  advisory: {
-    identifiers: IIdentifier[];
-    permalink: string;
-  };
 }
 
 interface IChaining {
