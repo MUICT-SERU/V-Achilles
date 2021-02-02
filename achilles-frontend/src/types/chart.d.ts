@@ -25,3 +25,5 @@ interface ITooltipData {
   node: INode
   advisory: ISecurityVulnerability[]
 }
+
+interface IAdvisoriesData { [key: string]: ISecurityVulnerability[] }

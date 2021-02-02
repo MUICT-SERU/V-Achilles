@@ -12,10 +12,14 @@ interface ISecurityVulnerability {
   advisory: {
     permalink: string
     ghsaId?: string
-    identifiers?: { type: string; value: string; }[]
+    identifiers?: IAdvisoryIdentifier[]
   },
 }
 
+interface IAdvisoryIdentifier {
+  type: string;
+  value: string;
+}
 
 interface IQueryVulnerabilityResponse {
   data: {

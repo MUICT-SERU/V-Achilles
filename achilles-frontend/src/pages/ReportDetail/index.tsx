@@ -16,6 +16,7 @@ const ReportDetail: React.FC = () => {
     setLoading(true);
     HttpUtil.get(`${ROUTE_API.reports}/${urlParams?.reportId}`)
       .then((response) => {
+        // console.log(response.data.report)
         setData(response.data.report);
         setLoading(false);
       })
@@ -28,7 +29,13 @@ const ReportDetail: React.FC = () => {
   return (
     <>
       {isLoading && <Loading />}
-      {data && !isLoading ? <Report {...{ data: data?.reportDetail }} /> : ""}
+      {data && !isLoading ? (
+        <Report
+          {...{ data: data?.reportDetail, createdDate: data?.createdAt }}
+        />
+      ) : (
+        ""
+      )}
     </>
   );
 };

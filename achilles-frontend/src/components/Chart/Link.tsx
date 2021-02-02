@@ -1,22 +1,23 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { select } from 'd3'
+import { useEffect, useRef } from 'react';
+import { select } from 'd3';
 
 const Link = (props: any) => {
-  const g = useRef<any>(null)
-  const ref = useRef<any>(null)
-  const links = useRef<any>(null)
+  const g = useRef<any>(null);
+  const ref = useRef<any>(null);
+  const links = useRef<any>(null);
 
   useEffect(() => {
-    setup()
-    setupLink(props.data)
-  }, [props.data, props.simulation])
+    setup();
+    setupLink(props.data);
+  }, [props.data, props.simulation]);
 
   useEffect(() => {
-    props.setLinks(links.current)
-  }, [props.data, props.setLinks])
+    props.setLinks(links.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.data, props.setLinks]);
 
   function setup() {
-    ref.current = select(g.current)
+    ref.current = select(g.current);
   }
 
   function setupLink(data: any) {
@@ -24,13 +25,11 @@ const Link = (props: any) => {
       .selectAll('path')
       .data(data)
       .join('path')
-        .attr("stroke", "#fff")
-        .attr('marker-start', 'url(#arrow-head)')
+      .attr('stroke', '#fff')
+      .attr('marker-start', 'url(#arrow-head)');
   }
 
-  return (
-    <g ref={g}></g>
-  )
-}
+  return <g ref={g}></g>;
+};
 
-export default Link
+export default Link;

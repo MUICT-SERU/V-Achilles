@@ -1,29 +1,27 @@
-import React, { useEffect, useRef } from 'react'
-import * as d3 from 'd3'
+import { useEffect, useRef } from 'react';
+import * as d3 from 'd3';
 
-import { NODE_STATUS, NODE_TYPE } from 'types/index'
+import { NODE_STATUS, NODE_TYPE } from 'types/index';
 
 const Node = (props: any) => {
-  const ref = useRef(null)
-  const groupElement = useRef(d3.select(ref.current))
-  const nodes = useRef<any>()
+  const ref = useRef(null);
+  const groupElement = useRef(d3.select(ref.current));
+  const nodes = useRef<any>();
 
   useEffect(() => {
-    groupElement.current = d3.select(ref.current)
-    setupCircle(props.data)
+    groupElement.current = d3.select(ref.current);
+    setupCircle(props.data);
 
     return () => {
-      nodes.current
-        .selectAll('circle, text, div')
-        .remove()
-    }
-  }, [props.data, props.simulation])
-
+      nodes.current.selectAll('circle, text, div').remove();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.data, props.simulation]);
 
   useEffect(() => {
-    props.setNodes(nodes.current)
-  }, [props.data, props.simulation, props.setNodes])
-
+    props.setNodes(nodes.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.data, props.simulation, props.setNodes]);
 
   function setupCircle(data: any) {
     // Create group node
@@ -31,72 +29,75 @@ const Node = (props: any) => {
       .selectAll('g')
       .data(data)
       .join('g')
-      .call(drag(props.simulation))
+      .call(drag(props.simulation));
 
     // Create circle node
     nodes.current
-        .append('circle')
-        .attr('r', (d: any) => {
-          if (d.type === NODE_TYPE.ROOT) {
-            return 10
+      .append('circle')
+      .attr('r', (d: any) => {
+        if (d.type === NODE_TYPE.ROOT) {
+          return 10;
+        }
+        return 5;
+      })
+      .attr('fill', (d: INode) => {
+        if (d.type === NODE_TYPE.ROOT) {
+          return '#9722e6';
+        } else {
+          if (d.status === NODE_STATUS.VULNERABLE) {
+            return '#f00';
           }
-          return 5
-        })
-        .attr('fill', (d: INode) => {
-          if (d.type === NODE_TYPE.ROOT) {
-            return '#0ef'
-          } else {
-            if (d.status === NODE_STATUS.VULNERABLE) {
-              return '#f00'
-            }
 
-            switch (d.level) {
-              case 1: return '#f3a';
-              case 2: return '#00f';
-              case 3: return '#0f0';
-              case 4: return '#ff0';
-              default: return '#fff;'
-            }
+          switch (d.level) {
+            case 1:
+              return '#0ef';
+            case 2:
+              return '#00f';
+            case 3:
+              return '#0f0';
+            case 4:
+              return '#ff0';
+            default:
+              return '#fff;';
           }
-        })
-      .enter()
+        }
+      })
+      .enter();
 
     // Create text node
     nodes.current
       .append('text')
       .text((d: INode) => {
         if (d.status === NODE_STATUS.VULNERABLE || d.type === NODE_TYPE.ROOT) {
-          return d.id
+          return d.id;
         }
-        return ''
+        return '';
       })
       .attr('x', (d: INode) => {
-        if (d.type === NODE_TYPE.ROOT)
-          return 13
-        return 8
+        if (d.type === NODE_TYPE.ROOT) return 13;
+        return 8;
       })
       .attr('y', '0.31em')
-      .attr('fill', '#fff')
+      .attr('fill', '#fff');
 
     // Add mouseover/mouseout event for node
-    nodes.current
-      .each(function (this: any, d: any) {
-        const node = d3.select(this)
-        const text = node.select('text')
-        const circle = node.select('circle')
+    nodes.current.each(function (this: any, d: any) {
+      const node = d3.select(this);
+      const text = node.select('text');
+      const circle = node.select('circle');
 
-        if (d.type === NODE_TYPE.DEPENDENCY) {
-          node.on('mouseover', function (event: any, d: any) {
-            props.onMouseOver(event, d)
-            circle.attr('r', 10)
-            text.attr('x', 13)
-          })
-          node.on('mouseout', function () {
-            circle.attr('r', 5)
-            text.attr('x', 8)
-          })
-        }
-      })
+      if (d.type === NODE_TYPE.DEPENDENCY) {
+        node.on('mouseover', function (event: any, d: any) {
+          props.onMouseOver(event, d);
+          circle.attr('r', 10);
+          text.attr('x', 13);
+        });
+        node.on('mouseout', function () {
+          circle.attr('r', 5);
+          text.attr('x', 8);
+        });
+      }
+    });
   }
 
   const drag = (simulation: any) => {
@@ -128,7 +129,7 @@ const Node = (props: any) => {
     <>
       <g ref={ref} strokeLinecap="round" strokeLinejoin="round"></g>
     </>
-  )
-}
+  );
+};
 
-export default Node
+export default Node;

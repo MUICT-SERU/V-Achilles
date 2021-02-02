@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from "react";
-import { Box } from "@material-ui/core";
-import { createGlobalStyle } from "styled-components";
+import React, { useEffect, useRef, useState } from 'react';
+import { Box, Typography, LinearProgress } from '@material-ui/core';
+import { createGlobalStyle } from 'styled-components';
 
-import Loading from "components/Chart/Loading";
-import Chart from "components/Chart";
-import InputFile from "components/Chart/InputFile";
+import Chart from 'components/Chart';
+import { CyanButton } from 'components/CustomButton';
 
-import HttpUtil from "utils/http-util";
-import { ROUTE_API, ROUTE_PATH } from "utils/route-util";
+import HttpUtil from 'utils/http-util';
+import { ROUTE_API, ROUTE_PATH } from 'utils/route-util';
+import { createReport } from 'utils/visualization-util';
 
-import { githubAuth } from "lib/query";
-import useRouter from "hooks/useRouter";
+import { githubAuth } from 'lib/query';
+import useRouter from 'hooks/useRouter';
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -19,87 +19,26 @@ const GlobalStyle = createGlobalStyle`
   }
 `;
 
-const mockReportData = {
-  username: "KlintonICT",
-  repository_name: "baak_web_demo",
-  items: [
-    {
-      package: {
-        name: "mongodb",
-      },
-      chaining: [{ source: "baak_web_demo", target: "mongodb@^3.6.3" }],
-      firstPatchedVersion: {
-        identifier: "4.2.12",
-      },
-      severity: "HIGH",
-      vulnerableVersionRange: "< 3.7.13",
-      advisory: {
-        //just added
-        identifiers: [
-          {
-            type: "GHSA",
-            value: "GHSA-mh5c-679w-hh4r",
-          },
-        ],
-      },
-    },
-    {
-      package: {
-        name: "minimist",
-      },
-      chaining: [
-        { source: "baak_web_demo", target: "json5@^2.1.3" },
-        { source: "json5@^2.1.3", target: "minimist@^1.2.5" },
-      ],
-      firstPatchedVersion: {
-        identifier: "1.5.6",
-      },
-      severity: "LOW",
-      vulnerableVersionRange: "< 1.3.5",
-      advisory: {
-        //just added
-        identifiers: [
-          {
-            type: "GHSA",
-            value: "GHSA-vh95-rmgr-6w4m",
-          },
-          {
-            type: "CVE",
-            value: "CVE-2020-7598",
-          },
-        ],
-      },
-    },
-    {
-      package: {
-        name: "minimist",
-      },
-      chaining: [
-        { source: "baak_web_demo", target: "json5@^2.1.3" },
-        { source: "json5@^2.1.3", target: "minimist@^1.2.5" },
-      ],
-      firstPatchedVersion: {
-        identifier: "1.5.6",
-      },
-      severity: "MODERATE",
-      vulnerableVersionRange: "< 1.4.5",
-      advisory: {
-        //just added
-        identifiers: [
-          {
-            type: "GHSA",
-            value: "GHSA-7fhm-mqm4-2wp7",
-          },
-        ],
-      },
-    },
-  ],
-};
+interface INodeLinksData {
+  nodes: INode[];
+  links: ILink[];
+}
 
 const Visualization: React.FC = () => {
-  const [username, setUsername] = useState("Loading...");
-  const [progress, setProgress] = useState<number>(0);
-  // const [reportData, setReportData] = useState<IReport | null>(mockReportData)
+  const [levelDep, setLevelDep] = useState(1);
+  const [nodeRemain, setNodeRemain] = useState(0);
+  const [isVisualizing, setVisualizing] = useState(true);
+  const [repoName, setRepoName] = useState('');
+  const [username, setUsername] = useState('');
+  const [jsonPath, setJsonPath] = useState('');
+
+  const [nodeLinksData, setNodeLinksData] = useState<INodeLinksData>({
+    nodes: [],
+    links: [],
+  });
+  const [advisoriesData, setAdvisoriesDataData] = useState<IAdvisoriesData>({});
+
+  const repositoryName = useRef<string>('-');
 
   const { goTo } = useRouter();
 
@@ -118,39 +57,46 @@ const Visualization: React.FC = () => {
     // === from localStorage.getItem('packageJsonContent)
     // ==================================================
 
-    const packageJsonContent = localStorage.getItem("packageJsonContent") || "";
+    const packageJsonContent = localStorage.getItem('packageJsonContent') || '';
     const json = JSON.parse(packageJsonContent);
-    setData(json);
+
+    console.log(json);
+    setRepoName(json.repo);
+    if (
+      !json.packageJson.dependencies ||
+      !Object.hasOwnProperty.call(json.packageJson, 'dependencies')
+    )
+      setVisualizing(false);
+    setData(json.packageJson);
+    setJsonPath(json.jsonPath);
   }
 
-  // File Input Handler
-  function onFileChange(file: any) {
-    const fileReader = new FileReader();
-    // On File Reader done
-    fileReader.addEventListener("load", () => {
-      // Convert text to JSON object
-      let json = {};
-      try {
-        json = JSON.parse(fileReader.result?.toString() || "");
+  const onCreateReportData = () => {
+    const { nodes, links } = nodeLinksData;
 
-        setData(json);
-        console.log(json);
-      } catch (e) {
-        console.error(e);
-        alert(
-          "File input cannot convert to JSON object.\nPlease check your file input."
-        );
-      }
-    });
+    const info = {
+      username,
+      repositoryName: repositoryName.current,
+    };
 
-    // Start read file as text
-    fileReader.readAsText(file);
-  }
+    const report = createReport(nodes, links, advisoriesData, info);
+
+    console.log(report);
+  };
 
   const onCreateReport = () => {
-    const _reportData = {};
+    const { nodes, links } = nodeLinksData;
 
-    HttpUtil.post(ROUTE_API.reports, { report: mockReportData })
+    const info = {
+      username,
+      repositoryName: repoName,
+    };
+
+    const report = createReport(nodes, links, advisoriesData, info);
+
+    console.log(report);
+
+    HttpUtil.post(ROUTE_API.reports, { report: report })
       .then((response) => {
         console.log(response.data.message);
         const reportId = response.data.reportId;
@@ -165,35 +111,69 @@ const Visualization: React.FC = () => {
   // ======================
   // ---- Event handler
   // ======================
-  // function onCreateReportClick() {
-  //   goTo(ROUTE_PATH.reportDetail)()
-  // }
 
   return (
     <div className="container">
       <GlobalStyle />
-      <Box mt={1}>
-        <div>
-          <p>
-            <span>Github user: </span>
-            <strong>{username}</strong>
-          </p>
-        </div>
+      <Box mt={2}>
+        <Box
+          display="flex"
+          flexDirection="row"
+          alignItems="center"
+          justifyContent="space-between"
+          mb={2}
+        >
+          <Box>
+            <Typography variant="body1">{username}</Typography>
+            <Typography variant="body1">{repoName}</Typography>
+            {jsonPath ? (
+              <Typography variant="body1">From: {jsonPath}</Typography>
+            ) : (
+              ''
+            )}
+          </Box>
+          {isVisualizing ? (
+            ''
+          ) : (
+            <CyanButton variant="contained" onClick={onCreateReport}>
+              Create Report
+            </CyanButton>
+          )}
+        </Box>
+        {isVisualizing ? (
+          <Box textAlign="center" mb={5}>
+            <Box mb={1}>
+              <Typography variant="h6">
+                Finding Vulnerabilities ( Level {levelDep} / 4: {nodeRemain}{' '}
+                Nodes remaining )
+              </Typography>
+            </Box>
+            <LinearProgress
+              variant="buffer"
+              value={((levelDep - 0.5) / 4) * 100}
+              valueBuffer={(levelDep / 4) * 100}
+            />
+          </Box>
+        ) : (
+          ''
+        )}
 
-        <div>{/* <InputFile onChange={onFileChange} /> */}</div>
-
         <div>
-          <Loading progress={progress} />
-        </div>
-
-        <div>
-          <button onClick={onCreateReport}>Create report</button>
+          <button onClick={onCreateReportData}>Create report data</button>
         </div>
 
         <hr />
 
         <div>
-          <Chart setProgress={setProgress} data={data} />
+          <Chart
+            setAdvisoriesDataData={setAdvisoriesDataData}
+            setVisualizing={setVisualizing}
+            data={data}
+            setNodeLinksData={setNodeLinksData}
+            setLevelDep={setLevelDep}
+            setNodeRemain={setNodeRemain}
+            levelDep={levelDep}
+          />
         </div>
       </Box>
     </div>
