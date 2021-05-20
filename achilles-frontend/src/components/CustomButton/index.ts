@@ -8,6 +8,7 @@ const CyanButton = withStyles((theme) => ({
     borderRadius: theme.spacing(10),
     textTransform: "none",
     backgroundColor: "#65c8d0",
+    border: "1px solid #65c8d0",
     "&:hover": {
       backgroundColor: "#65c8d0",
       opacity: 0.7,
@@ -21,6 +22,7 @@ const DisabledButton = withStyles((theme) => ({
     borderRadius: theme.spacing(10),
     textTransform: "none",
     backgroundColor: "#65c8d0",
+    border: "1px solid #65c8d0",
     opacity: 0.5,
     "&.MuiButtonBase-root.Mui-disabled": {
       color: "white",

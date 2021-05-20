@@ -1,5 +1,5 @@
-import { client } from 'lib/gql'
-import { gql } from '@apollo/client'
+import { client } from 'lib/gql';
+import { gql } from '@apollo/client';
 
 export async function queryVulnerability(packageName: string) {
   const vulnerability = await client.query({
@@ -26,10 +26,10 @@ export async function queryVulnerability(packageName: string) {
           }
         }
       }
-    `
-  })
+    `,
+  });
 
-  return vulnerability
+  return vulnerability;
 }
 
 export async function githubAuth() {
@@ -40,8 +40,27 @@ export async function githubAuth() {
           login
         }
       }
-    `
-  })
+    `,
+  });
 
-  return authResult
+  return authResult;
 }
+
+export const queryCwes = async (ghsaId: string) => {
+  const securityAdvisory = await client.query({
+    query: gql`
+      query {
+        securityAdvisory(ghsaId: "${ghsaId}") {
+          cwes(first: 10) {
+            nodes {
+              cweId
+              name
+            }
+          }
+        }
+      }
+    `,
+  });
+
+  return securityAdvisory.data.securityAdvisory.cwes.nodes;
+};

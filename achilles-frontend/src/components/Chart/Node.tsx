@@ -34,11 +34,11 @@ const Node = (props: any) => {
     // Create circle node
     nodes.current
       .append('circle')
-      .attr('r', (d: any) => {
+      .attr('r', (d: INode) => {
         if (d.type === NODE_TYPE.ROOT) {
           return 10;
         }
-        return 5;
+        return 5 + d.dependenceiesAmount;
       })
       .attr('fill', (d: INode) => {
         if (d.type === NODE_TYPE.ROOT) {
@@ -114,8 +114,10 @@ const Node = (props: any) => {
 
     const dragended = (event: any, d: any) => {
       if (!event.active) simulation.alphaTarget(0);
-      d.fx = null;
-      d.fy = null;
+      // d.fx = null;
+      // d.fy = null;
+      d.fx = d.x;
+      d.fy = d.y;
     };
 
     return d3

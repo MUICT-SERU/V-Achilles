@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
-import useRouter from "../../hooks/useRouter";
+import { useState, useEffect } from 'react';
+import useRouter from '../../hooks/useRouter';
 
-import Report from "../../components/Report";
-import Loading from "../../components/Loading";
+import Report from '../../components/Report';
+import Loading from '../../components/Loading';
 
-import { ROUTE_API } from "../../utils/route-util";
-import HttpUtil from "../../utils/http-util";
+import { ROUTE_API } from '../../utils/route-util';
+import HttpUtil from '../../utils/http-util';
 
 const ReportDetail: React.FC = () => {
   const { urlParams } = useRouter();
@@ -29,12 +29,10 @@ const ReportDetail: React.FC = () => {
   return (
     <>
       {isLoading && <Loading />}
-      {data && !isLoading ? (
+      {data && !isLoading && (
         <Report
           {...{ data: data?.reportDetail, createdDate: data?.createdAt }}
         />
-      ) : (
-        ""
       )}
     </>
   );

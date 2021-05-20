@@ -1,19 +1,19 @@
-type ADVISORY_SERVERITY_LEVEL = 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL'
+type ADVISORY_SERVERITY_LEVEL = 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL';
 
 interface ISecurityVulnerability {
   package: {
-    name: string
-  },
+    name: string;
+  };
   firstPatchedVersion: {
-    identifier: string // version: e.g. 1.9.0
-  },
-  vulnerableVersionRange: string // version rager: e.g. < 1.9.0,
-  severity: ADVISORY_SERVERITY_LEVEL,
+    identifier: string; // version: e.g. 1.9.0
+  };
+  vulnerableVersionRange: string; // version rager: e.g. < 1.9.0,
+  severity: ADVISORY_SERVERITY_LEVEL;
   advisory: {
-    permalink: string
-    ghsaId?: string
-    identifiers?: IAdvisoryIdentifier[]
-  },
+    permalink: string;
+    ghsaId?: string;
+    identifiers?: IAdvisoryIdentifier[];
+  };
 }
 
 interface IAdvisoryIdentifier {
@@ -24,8 +24,8 @@ interface IAdvisoryIdentifier {
 interface IQueryVulnerabilityResponse {
   data: {
     securityVulnerabilities: {
-      nodes: ISecurityVulnerability[]
-    }
+      nodes: ISecurityVulnerability[];
+    };
   };
 
   loading: boolean;

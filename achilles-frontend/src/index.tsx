@@ -3,6 +3,15 @@ import ReactDOM from "react-dom";
 import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
+import { ApplicationInsights } from "@microsoft/applicationinsights-web";
+
+const appInsights = new ApplicationInsights({
+  config: {
+    instrumentationKey: process.env.REACT_APP_APPINSIGHT_KEY,
+  }
+});
+appInsights.loadAppInsights();
+appInsights.trackPageView();
 
 ReactDOM.render(
   <Suspense fallback={null}>
