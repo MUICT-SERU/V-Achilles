@@ -14,7 +14,7 @@ const isPackgeJson = async (req: isPackageJsonReq, res: any, _: any) => {
 
   try {
     const response = await axios.get(
-      `https://api.github.com/search/code?q=user:${user}+dependencies+repo:${user}/${repoName}+filename:package.json`,
+      `https://api.github.com/search/code?q=user:${user}+dependencies+repo:${user}/${repoName}+filename:package.json+fork:true`,
       {
         headers: {
           Authorization: `token ${req.user.access_token}`,
