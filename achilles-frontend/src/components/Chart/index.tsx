@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Box, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import ZoomOutMapIcon from '@material-ui/icons/ZoomOutMap';
+import semverExistingMax from 'semver-existing-max';
 
 import Node from 'components/Chart/Node';
 import Link from 'components/Chart/Link';
@@ -13,7 +14,12 @@ import { queryVulnerability } from 'lib/query';
 import { getDependencies } from 'lib/api';
 import { filterRelatedVulnerabilities } from 'lib/vulnerability';
 
-import { NODE_TYPE, NODE_STATUS } from 'types/index';
+import {
+  createVulnerableChaining,
+  getVulernableNodes,
+} from 'utils/visualization-util';
+
+import { NODE_TYPE, NODE_STATUS, LINK_STATUS } from 'types/index';
 
 const height: number = 600;
 const width: number = 600;
@@ -27,6 +33,7 @@ const mockNodesData: INode[] = [
     type: NODE_TYPE.ROOT,
     status: NODE_STATUS.CLEAN,
     version: '',
+    dependenceiesAmount: 0,
     level: 0,
   },
 ];
@@ -49,15 +56,12 @@ const Chart = (props: any) => {
 
   const simulation = useRef<any>(null);
   const zoom = useRef<any>();
-  // const nodeInput = useRef<any>();
-  // const nodeLevelLimitInput = useRef<any>();
 
   const [nodesData, setNodesData] = useState<INode[]>(mockNodesData);
   const [linksData, setLinksData] = useState<ILink[]>(mockLinksData);
-  const [depData, setDepData] = useState<any>([]);
+  const [depData, setDepData] = useState<IDepData[]>([]);
   const [nodeLevel, setNodeLevel] = useState<number>(1);
   const nodeLevelLimit = 4;
-  // const [nodeLevelLimit, setNodeLevelLimit] = useState<number>(4);
   const [
     isVulnerabilityCheckDone,
     setVulnerabilityCheckDone,
@@ -65,14 +69,13 @@ const Chart = (props: any) => {
 
   const [nodes, setNodes] = useState<any>();
   const [links, setLinks] = useState<any>();
+  const [tooltipData, setTooltipData] = useState<ITooltipData | null>(null);
+  const [tooltipVisibility, setTooltipVisibility] = useState<boolean>(false);
   const [advisoriesData, setAdvisoriesData] = useState<{
     [key: string]: ISecurityVulnerability[];
   }>({});
-  const [tooltipData, setTooltipData] = useState<ITooltipData | null>(null);
-  const [tooltipVisibility, setTooltipVisibility] = useState<boolean>(false);
 
   const isDone = useRef<boolean>(true);
-  // const interval = useRef<any>(null);
 
   useEffect(() => {
     setupZoom();
@@ -103,9 +106,9 @@ const Chart = (props: any) => {
   useEffect(() => {
     if (depData.length > 0) {
       props.setNodeRemain(depData.length - 1);
-      console.log('Nodes remaining:', depData.length - 1);
-      console.log('Interation status:', isDone.current);
-      console.log('----------');
+      // console.log('Nodes remaining:', depData.length - 1);
+      // console.log('Interation status:', isDone.current);
+      // console.log('----------');
       animate();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -115,13 +118,21 @@ const Chart = (props: any) => {
   // ----
   // =============================
   useEffect(() => {
-    // When the level node is running out
-    if (depData.length <= 0 && !isDone.current) {
-      console.log('Continue on next level', nodeLevel, '/', nodeLevelLimit);
+    // When the node in current is running out
+    if (depData.length <= 0 && !isDone.current && nodeLevel <= nodeLevelLimit) {
+      // console.log(
+      //   'Check vulnerability next level',
+      //   nodeLevel,
+      //   '/',
+      //   nodeLevelLimit
+      // );
 
+      // THEN
       // Check vulnerability and fetch next level
       (async () => {
         await checkVulnerability();
+        // Set vulnerability check state to trigger
+        // Fetch children dependencies
         setVulnerabilityCheckDone(true);
       })();
     }
@@ -129,10 +140,22 @@ const Chart = (props: any) => {
   }, [depData, nodeLevel]);
 
   useEffect(() => {
-    // When the level node is running out
-    if (depData.length <= 0 && !isDone.current && isVulnerabilityCheckDone) {
-      console.log('Continue on next level', nodeLevel, '/', nodeLevelLimit);
+    // When the node in current is running out
+    // and vulnerability check is done
+    if (
+      depData.length <= 0 &&
+      !isDone.current &&
+      nodeLevel <= nodeLevelLimit &&
+      isVulnerabilityCheckDone
+    ) {
+      // console.log(
+      //   'Fetch chilldren nodes on next level',
+      //   nodeLevel,
+      //   '/',
+      //   nodeLevelLimit
+      // );
 
+      // ----------------------------------------
       // Check vulnerability and fetch next level
       (async () => {
         await fetchChildrenNodes();
@@ -141,19 +164,29 @@ const Chart = (props: any) => {
 
       // Stop fetching next level when the next level reach limit
       if (nodeLevel >= nodeLevelLimit) {
-        console.log('set isDone.current = true');
         isDone.current = true;
       }
     }
 
+    // ******************************
+    // When every level node is done
+    // Check vulnerable links
+    // ******************************
     if (isDone.current && depData.length <= 0) {
       props.setAdvisoriesDataData(advisoriesData);
-      console.log('isDone.current', isDone.current);
-      console.log(linksData);
-      if (nodeLevel > nodeLevelLimit) props.setVisualizing(false);
+
+      if (nodeLevel > nodeLevelLimit) {
+        onNodeLinkDone();
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [depData, nodeLevel, isVulnerabilityCheckDone]);
+
+  // ##############################################################################
+
+  // =============================
+  // ---- Process
+  // =============================
 
   // =============================
   // ---- Data change
@@ -165,31 +198,29 @@ const Chart = (props: any) => {
   }
 
   async function animate() {
-    const ADD_NODE_SPEED = 50;
+    // const ADD_NODE_SPEED = 50;
 
     // Gently add node/link
     function gentlyAddNodeLink(dependency: any) {
-      return new Promise((resolve) => {
-        const node = createNodeData(
-          dependency.node.id,
-          dependency.node.version,
-          dependency.node.level
-        );
-        // if (isNodeExists(node)) {
-        //   return resolve(null)
-        // }
+      // return new Promise((resolve) => {
+      const node = createNodeData(
+        dependency.node.id,
+        dependency.node.version,
+        dependency.node.level
+      );
 
-        setTimeout(() => {
-          addNodeLink(node, dependency.link.id);
-          resolve(null);
-        }, ADD_NODE_SPEED);
-      });
+      // setTimeout(() => {
+      addNodeLink(dependency.link.id, node);
+      // resolve(null);
+      // }, ADD_NODE_SPEED);
+      // });
     }
 
     const _depData = depData;
     const newDepData = _depData.splice(1);
 
-    await gentlyAddNodeLink(_depData[0]);
+    // await gentlyAddNodeLink(_depData[0]);
+    gentlyAddNodeLink(_depData[0]);
     setDepData(newDepData);
   }
 
@@ -243,13 +274,6 @@ const Chart = (props: any) => {
     setLinksData(mockLinksData);
   }
 
-  function onReset() {
-    ref.current
-      .transition()
-      .duration(500)
-      .call(zoom.current.transform, d3.zoomIdentity);
-  }
-
   // Force Simulation
   function setupForceSimulation(_nodes: any, _links: any) {
     simulation.current = d3
@@ -277,8 +301,8 @@ const Chart = (props: any) => {
 
   function linkPos(d: any) {
     return `
-      M${d.source.x},${d.source.y}
-      L ${d.target.x},${d.target.y}
+      M${d.target.x},${d.target.y}
+      L ${d.source.x},${d.source.y}
     `;
   }
 
@@ -302,8 +326,8 @@ const Chart = (props: any) => {
     // .attr('stroke', '#fff')
   }
 
-  function addNodeLink(source: INode, target: string | number = 'PROJECT') {
-    addNodeData(source);
+  function addNodeLink(source: string | number = 'PROJECT', target: INode) {
+    addNodeData(target);
     addLinkData(createLinkData(source, target));
   }
 
@@ -315,6 +339,7 @@ const Chart = (props: any) => {
     id: string | number = ++nodeCount,
     version = '*',
     level = 1,
+    dependenceiesAmount = 0,
     type = NODE_TYPE.DEPENDENCY,
     status = NODE_STATUS.CLEAN
   ): INode {
@@ -324,16 +349,17 @@ const Chart = (props: any) => {
       version,
       level,
       type,
+      dependenceiesAmount,
       status,
     };
   }
 
   function createLinkData(
-    source: INode,
-    target: string | number = 'PROJECT',
+    source: string | number = 'PROJECT',
+    { id: target }: INode,
     level = 1
   ): ILink {
-    return { source: source.id, target, level };
+    return { source, target, level, status: LINK_STATUS.CLEAN };
   }
 
   // --------------------------------
@@ -356,24 +382,6 @@ const Chart = (props: any) => {
   function addLinkData(link: ILink) {
     setLinksData([...linksData, link]);
   }
-
-  // ---------------------------------
-  // ======== Handle event
-  // ---------------------------------
-
-  // function onAddNodeLink() {
-  //   addNodeLink(createNodeData());
-  // }
-
-  // function onAddNodeInput() {
-  //   let input = Number(nodeInput.current.value);
-
-  //   if (Number.isNaN(input)) {
-  //     input = nodeInput.current.value;
-  //   }
-
-  //   addNodeLink(createNodeData(), input);
-  // }
 
   // -----------------------------
   // ======== Tooltip
@@ -409,6 +417,41 @@ const Chart = (props: any) => {
     }
   }
 
+  const updateNodes: IUpdateNodesFunc = (
+    nodes = [],
+    filterCondition = (node: INode, index?: number) => true
+  ): void => {
+    setNodesData([...nodesData.filter(filterCondition), ...nodes]);
+  };
+
+  const updateLinks: IUpdateLinksFunc = (
+    nodes = [],
+    links = linksData,
+    mapCondition = (link: ILink, index?: number) => link
+  ): void => {
+    const nodesToUpdate: any = {};
+
+    nodes.forEach((node) => Object.assign(nodesToUpdate, { [node.id]: node }));
+
+    // Update links data
+    setLinksData(
+      links.map((link: ILink) => {
+        const newNode = nodesToUpdate[link.target.id.toString()];
+
+        if (newNode) {
+          return Object.assign(
+            {},
+            {
+              ...mapCondition(link),
+              target: newNode,
+            }
+          );
+        }
+        return Object.assign({}, { ...mapCondition(link) });
+      })
+    );
+  };
+
   // -----------------------------
   // ======== Check vulnerability
   // -----------------------------
@@ -430,10 +473,7 @@ const Chart = (props: any) => {
             [node.id]: result.data.securityVulnerabilities.nodes,
           });
 
-          resolve({
-            result,
-            node,
-          });
+          resolve({ result, node });
         })
       );
     });
@@ -448,7 +488,7 @@ const Chart = (props: any) => {
     // ======= Identify vulerable node
     // --------------------------------
     let vulnerableNodes: INode[] = [];
-    let vulnerableNodesName: any = {};
+    let vulnerableNodesMap: any = {};
 
     vulnerableNodes = result.map((item) => {
       const nodes = filterRelatedVulnerabilities(
@@ -461,7 +501,7 @@ const Chart = (props: any) => {
           status: NODE_STATUS.VULNERABLE,
         };
 
-        Object.assign(vulnerableNodesName, { [item.node.id]: node });
+        Object.assign(vulnerableNodesMap, { [item.node.id]: node });
         return node;
       }
 
@@ -471,24 +511,27 @@ const Chart = (props: any) => {
     // ------------------------------
     // ======== Update Node info
     // ------------------------------
-    setNodesData([
-      ...nodesData.filter((node) => node.level !== nodeLevel - 1),
-      ...vulnerableNodes,
-    ]);
-    setLinksData(
-      linksData.map((link: ILink) => {
-        if (vulnerableNodesName[link.source.id.toString()]) {
-          return Object.assign(
-            {},
-            {
-              ...link,
-              source: vulnerableNodesName[link.source.id.toString()],
-            }
-          );
+
+    const vulnerableNodesName: string[] = Object.keys(vulnerableNodesMap);
+
+    updateNodes(vulnerableNodes, (node) => node.level !== nodeLevel - 1);
+    updateLinks(
+      vulnerableNodes,
+      linksData,
+      (link: ILink): ILink => {
+        let linkStatus = link.status;
+        if (link.status !== LINK_STATUS.VULNERABLE) {
+          linkStatus =
+            vulnerableNodesName.indexOf(link.target.id) >= 0
+              ? LINK_STATUS.VULNERABLE
+              : LINK_STATUS.CLEAN;
         }
 
-        return Object.assign({}, { ...link });
-      })
+        return {
+          ...link,
+          status: linkStatus,
+        };
+      }
     );
 
     setVulnerabilityCheckDone(true);
@@ -503,11 +546,16 @@ const Chart = (props: any) => {
     const data = childrenDependencies.data;
 
     const currentVersion = data['dist-tags']['latest'];
-    const packageInfo = data['versions'][currentVersion];
+    const possibleMaxVersion = await semverExistingMax(
+      Object.keys(data['versions']),
+      node.version
+    );
+    const packageInfo =
+      data['versions'][possibleMaxVersion] || data['versions'][currentVersion];
     const dependencies = packageInfo.dependencies;
 
-    console.log('childrenDependencies of', node.name);
-    console.log(dependencies);
+    // console.log('childrenDependencies of', node.name);
+    // console.log(dependencies);
 
     const _dependencies: any[] = [];
 
@@ -534,48 +582,103 @@ const Chart = (props: any) => {
   // ==========================
   async function fetchChildrenNodes() {
     const _nodesData = nodesData;
+    // const nodesToUpdate: INode[] = [];
+    // const nodeNameToUpdate: string[] = [];
 
     let _depData: any = [];
 
-    for (let i = 0; i < _nodesData.length; i++) {
-      try {
-        const node = _nodesData[i];
-        // Node type need to be DEPENDENCY
-        // need to be current level only
-        // Node status need to be CLEAN
-        if (
-          node.type === NODE_TYPE.DEPENDENCY &&
-          node.level === nodeLevel - 1 &&
-          node.status === NODE_STATUS.CLEAN
-        ) {
-          const _dependencies = await getDistDependencies(_nodesData[i]);
+    await Promise.all(
+      _nodesData.map(async (node) => {
+        try {
+          // const node = _nodesData[i];
+          // Node type need to be DEPENDENCY
+          // need to be current level only
+          // Node status need to be CLEAN
+          if (
+            node.type === NODE_TYPE.DEPENDENCY &&
+            node.level === nodeLevel - 1
+            // node.status === NODE_STATUS.CLEAN
+          ) {
+            const _dependencies = await getDistDependencies(node);
 
-          _depData = _depData.concat(_dependencies);
+            _depData = _depData.concat(_dependencies);
+
+            // Add dependencies amount to node
+            // nodesToUpdate.push({
+            //   ...node,
+            //   dependenceiesAmount: _dependencies.length,
+            // });
+
+            // if (_dependencies.length > 0)
+            //   console.log('_dependencies.length', _dependencies.length)
+            //   nodeNameToUpdate.push(node.id.toString());
+          }
+        } catch (e) {
+          console.log(e);
         }
-      } catch (e) {
-        console.log(e);
-      }
-    }
+      })
+    );
 
     if (props.levelDep !== nodeLevel) props.setLevelDep(nodeLevel);
-    console.log('Level:' + nodeLevel + '/' + nodeLevelLimit);
+    // console.log('Level:' + nodeLevel + '/' + nodeLevelLimit);
+
+    // updateNodes(nodesToUpdate, (node) => nodeNameToUpdate.indexOf(node.id.toString()) >= 0);
+    // updateNodes(nodesToUpdate);
 
     setDepData(_depData);
     setNodeLevel(nodeLevel + 1);
     return _depData.length;
   }
 
-  // function onClearButtonClick() {
-  //   setNodesData(mockNodesData);
-  //   setLinksData(mockLinksData);
-  //   setNodeLevel(1);
-  // }
+  // -------------------------------
+  // ======== check vulnerable links
+  // -------------------------------
+  function checkVulerableLinks() {
+    const originVulnerableLinks: ILink[] = [];
+    const vulnerableLinks: ILink[] = [];
 
-  // function onSetLimitClick() {
-  //   const newNodeLimit = nodeLevelLimitInput.current.value;
-  //   setNodeLevelLimit(newNodeLimit);
-  //   updateData(props.data);
-  // }
+    createVulnerableChaining(
+      getVulernableNodes(nodesData),
+      linksData,
+      (v, s, t, link) => {
+        originVulnerableLinks.push(link);
+        vulnerableLinks.push({
+          ...link,
+          status: LINK_STATUS.VULNERABLE,
+        });
+      }
+    );
+
+    // console.log('----------- checkVulerableLinks -----------------');
+    // console.log(vulnerableLinks);
+
+    updateLinks(undefined, linksData, (link) => {
+      if (originVulnerableLinks.indexOf(link) < 0) {
+        return link;
+      }
+
+      return {
+        ...link,
+        status: LINK_STATUS.VULNERABLE,
+      };
+    });
+  }
+
+  // -----------------------
+  // ======== Event handlers
+  // -----------------------
+
+  function onNodeLinkDone() {
+    props.setVisualizing(false);
+    checkVulerableLinks();
+  }
+
+  function onReset() {
+    ref.current
+      .transition()
+      .duration(500)
+      .call(zoom.current.transform, d3.zoomIdentity);
+  }
 
   // -----------------------------
   // ======== Render
@@ -586,23 +689,19 @@ const Chart = (props: any) => {
       <Box my={1}>
         <CyanButton variant="contained" onClick={onReset}>
           <ZoomOutMapIcon fontSize="small" className={classes.zoomOutIcon} />
-          <Typography variant="body1">View full Graph</Typography>
+          <Typography variant="body2">Center Graph</Typography>
         </CyanButton>
       </Box>
 
-      {/* <div>
-        <button onClick={onReset}>Reset</button>
-        <button onClick={onAddNodeLink}>Add</button>
-
-        <input type="text" ref={nodeInput} />
-        <button onClick={onAddNodeInput}>Add</button>
-      </div>
-
-      <div>
-        <input type="number" ref={nodeLevelLimitInput} defaultValue={Number(nodeLevelLimit)}/>
-        <button onClick={onSetLimitClick}>Set limit</button>
-        <button onClick={onClearButtonClick}>Clear</button>
-      </div> */}
+      <Box>
+        <div>
+          <img
+            src="/images/achilles-legend.png"
+            alt="Graph Legend"
+            width="100%"
+          />
+        </div>
+      </Box>
 
       <div style={{ position: 'relative', overflow: 'auto' }}>
         <Tooltip

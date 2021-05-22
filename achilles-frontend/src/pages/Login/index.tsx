@@ -48,9 +48,11 @@ const useStyles = makeStyles((theme) => ({
       cursor: "pointer",
     },
   },
-  rightContainer: {
-    marginTop: theme.spacing(-5),
-  },
+  mobileLogo: {
+    [theme.breakpoints.down("sm")]: {
+      marginTop: theme.spacing(2)
+    }
+  }
 }));
 
 const Login: React.FC = () => {
@@ -98,11 +100,12 @@ const Login: React.FC = () => {
           alignItems="center"
           justify="space-around"
           className={classes.gridContainer}
+          spacing={1}
         >
           <Grid item>
-            <Box display="flex" alignItems="center" flexDirection="column">
+            <Box display="flex" alignItems="center" flexDirection="column" className={classes.mobileLogo}>
               <CardMedia
-                image="/images/achilles-logo-circle.png"
+                image={"/images/" + (process.env.NODE_ENV === 'development' ? "achilles-logo-dev-circle.png" : "achilles-logo-circle.png" ) }
                 className={classes.logo}
                 title="Achilles Logo"
               />
@@ -115,7 +118,7 @@ const Login: React.FC = () => {
                 </Typography>
               </Box>
               <GitHubLogin
-                scope="repo"
+                scope="repo,gist"
                 redirectUri=""
                 clientId={process.env.REACT_APP_GITHUB_CLIENT_ID}
                 buttonText={
@@ -134,7 +137,7 @@ const Login: React.FC = () => {
               />
             </Box>
           </Grid>
-          <Grid item className={classes.rightContainer}>
+          <Grid item>
             <Player
               loop
               autoplay

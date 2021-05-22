@@ -1,0 +1,19 @@
+version: '3.5'
+services:
+  achilles-backend-app:
+      container_name: achilles-backend-docker
+      build:
+        context: .
+        dockerfile: Dockerfile
+      volumes:
+        - '.:/usr/src/app'
+        - '/usr/src/app/node_modules'
+      ports:
+        - '4000:4000'
+      environment:
+        - NODE_ENV=${NODE_ENV}
+        - PORT=4000
+        - MONGO_URI=mongodb+srv://baak_admin:12345679@cluster0.8clat.mongodb.net/baak-db
+        - JWT_KEY=baakJwt@TOKEN
+        - GITHUB_CLIENT_ID=c2d4a7f77ba143e9e502
+        - GITHUB_CLIENT_SECRET=4f7be71d35d03e7da4bbf604e0c40cfb28411528

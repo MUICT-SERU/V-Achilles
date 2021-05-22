@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
+import { Box, Link, Divider } from '@material-ui/core';
 import styled from 'styled-components';
 import * as d3 from 'd3';
+import { severityColor } from 'utils/severityColor';
 
 interface IStyledWrapper {
   show?: boolean;
@@ -18,16 +20,16 @@ const StyledWrapper = styled('div')<IStyledWrapper>`
 `;
 
 const StyledCloseBtn = styled('div')`
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   border: 2px solid #000;
   background: #fff;
   cursor: pointer;
 
   position: relative;
-  right: -10px;
-  bottom: -12px;
+  right: -7px;
+  bottom: -18px;
 
   display: inline-flex;
   align-items: center;
@@ -41,11 +43,15 @@ const StyledCloseBtn = styled('div')`
 `;
 
 const StyledTooltip = styled('div')`
-  padding: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-left: 15px;
+  padding-right: 15px;
   color: #000;
   background: #fff;
   text-align: left;
   box-shadow: 0px 8px 11px 1px rgb(0 0 0 / 0.5);
+  border-radius: 10px;
 `;
 
 interface IStyledServeritiesProps {
@@ -55,7 +61,7 @@ interface IStyledServeritiesProps {
 const StyledServerities = styled('div')<IStyledServeritiesProps>`
   width: 6px;
   height: 100%;
-  background: ${(props) => (props.showColor ? '#f00' : '#fff')};
+  background: ${(props) => (props.showColor ? props.color : '#fff')};
   border: 1px solid #bbb;
   display: inline-block;
   margin-left: 1px;
@@ -63,6 +69,7 @@ const StyledServerities = styled('div')<IStyledServeritiesProps>`
 
 interface IServeritiesProps {
   level: ADVISORY_SERVERITY_LEVEL;
+  color: string;
 }
 
 const Serverities = (props: IServeritiesProps) => {
@@ -86,7 +93,11 @@ const Serverities = (props: IServeritiesProps) => {
       {Array(4)
         .fill(null)
         .map((item, i) => (
-          <StyledServerities key={i} showColor={identifyLevel() >= i + 1} />
+          <StyledServerities
+            key={i}
+            color={props.color}
+            showColor={identifyLevel() >= i + 1}
+          />
         ))}
     </div>
   );
@@ -115,8 +126,8 @@ const Tooltip = (props: IProps) => {
     if (data) {
       return (
         <>
-          <h2 style={{ marginBottom: 0 }}>{data.node.name}</h2>
-          <p style={{ marginTop: 0 }}>Version: {data.node.version}</p>
+          <h2 style={{ marginBottom: 5 }}>{data.node.name}</h2>
+          <p style={{ marginTop: 0 }}>Current version: {data.node.version}</p>
         </>
       );
     }
@@ -130,38 +141,64 @@ const Tooltip = (props: IProps) => {
     if (data && Array.isArray(data?.advisory) && data?.advisory.length > 0) {
       elements = data.advisory.map((item, index) => {
         return (
-          <div key={'tooltip-item-' + index}>
+          <div key={'tooltip-item-' + item.advisory.permalink + '-' + index}>
             <div style={{ display: 'flex' }}>
               <p style={{ display: 'inline-block', margin: 0 }}>
-                Serverity:{' '}
-                <span style={{ fontWeight: 'bold' }}>{item.severity}</span>
+                Severity:{' '}
+                <span
+                  style={{
+                    fontWeight: 'bold',
+                    color: severityColor(item.severity),
+                  }}
+                >
+                  {item.severity}
+                </span>
               </p>
-              <Serverities level={item.severity} />
+              <Serverities
+                level={item.severity}
+                color={severityColor(item.severity)}
+              />
             </div>
-            <p>Version range: {item.vulnerableVersionRange}</p>
+            <p>Vulnerable version: {item.vulnerableVersionRange}</p>
+
+            <p>
+              Patch Version:{' '}
+              {item.firstPatchedVersion?.identifier ??
+                'Currently, no patch version'}
+            </p>
 
             {item.advisory.identifiers?.map((_item) => (
-              <p key={_item.value} style={{ fontWeight: 'bold' }}>
-                {_item.value}
-              </p>
+              <Box key={'identifiers-' + _item.value} mb={2}>
+                <Link
+                  href={`${
+                    _item.type === 'GHSA'
+                      ? 'https://github.com/advisories/'
+                      : 'https://nvd.nist.gov/vuln/detail/'
+                  }${_item.value}`}
+                  color="inherit"
+                  target="_blank"
+                  variant="caption"
+                  underline="always"
+                >
+                  {_item.value}
+                </Link>
+              </Box>
             ))}
 
-            <a target="_blank" rel="noreferrer" href={item.advisory.permalink}>
-              Learn more
-            </a>
-            <hr />
+            {data.advisory.length - 1 !== index && <Divider style={{height: 2, marginBottom: 10}} />}
           </div>
         );
       });
-    } else {
-      elements = [<p>No vulnerability</p>];
     }
 
     if (data) {
-      return [<>{displayName()}</>, ...elements];
+      return [
+        <div key="display-package-name">{displayName()}</div>,
+        ...elements,
+      ];
     }
 
-    return <p>Nothing to show</p>;
+    return <p key="noting-to-show">Nothing to show</p>;
   }
 
   return (

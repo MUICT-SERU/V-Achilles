@@ -20,13 +20,7 @@ import AlertDialog from '../../components/AlertDialog';
 
 import { ROUTE_API, ROUTE_PATH } from '../../utils/route-util';
 import HttpUtil from '../../utils/http-util';
-import { item } from '../../utils/report-interface';
-import {
-  lowSeverityColor,
-  highSeverityColor,
-  criticalSeverityColor,
-  moderateSeverityColor,
-} from '../../utils/severityColor';
+import { severityColor } from 'utils/severityColor';
 
 import useRouter from '../../hooks/useRouter';
 
@@ -61,57 +55,10 @@ const useStyles = makeStyles((theme) => ({
   trashContainer: {
     textAlign: 'right',
   },
-  noneSeverityChip: {
+  severityChip: {
     marginRight: theme.spacing(1),
-    borderColor: 'rgb(128, 128, 128, 0.5)',
-    color: 'rgb(128, 128, 128, 0.5)',
   },
-  criticalSeverityChip: {
-    marginRight: theme.spacing(1),
-    borderColor: criticalSeverityColor,
-    color: criticalSeverityColor,
-  },
-  highSeverityChip: {
-    marginRight: theme.spacing(1),
-    borderColor: highSeverityColor,
-    color: highSeverityColor,
-  },
-  moderateSeverityChip: {
-    borderColor: moderateSeverityColor,
-    marginRight: theme.spacing(1),
-    color: moderateSeverityColor,
-  },
-  lowSeverityChip: {
-    borderColor: lowSeverityColor,
-    marginRight: theme.spacing(1),
-    color: lowSeverityColor,
-  },
-  avatarCritical: {
-    backgroundColor: criticalSeverityColor,
-    '&.MuiChip-avatar': {
-      color: '#ffffff',
-    },
-  },
-  avatarHigh: {
-    backgroundColor: highSeverityColor,
-    '&.MuiChip-avatar': {
-      color: '#ffffff',
-    },
-  },
-  avatarMedium: {
-    backgroundColor: moderateSeverityColor,
-    '&.MuiChip-avatar': {
-      color: '#ffffff',
-    },
-  },
-  avatarLow: {
-    backgroundColor: lowSeverityColor,
-    '&.MuiChip-avatar': {
-      color: '#ffffff',
-    },
-  },
-  avatarNone: {
-    backgroundColor: 'rgb(128, 128, 128, 0.5)',
+  avatar: {
     '&.MuiChip-avatar': {
       color: '#ffffff',
     },
@@ -169,6 +116,30 @@ const History: React.FC = () => {
       });
   };
 
+  const renderChip = (severityText: string, severity: number) => {
+    const firstLetterSeverity = severityText.charAt(0).toUpperCase();
+    const color =
+      severity > 0 ? severityColor(severityText) : severityColor('none');
+
+    return (
+      <Chip
+        variant="outlined"
+        size="small"
+        label={severity}
+        avatar={
+          <Avatar className={classes.avatar} style={{ backgroundColor: color }}>
+            {firstLetterSeverity}
+          </Avatar>
+        }
+        className={classes.severityChip}
+        style={{
+          borderColor: color,
+          color: color,
+        }}
+      />
+    );
+  };
+
   const renderHistoryList = () => {
     return reportHistory.map((report: any, index: number) => {
       let critical = 0,
@@ -176,7 +147,7 @@ const History: React.FC = () => {
         moderate = 0,
         low = 0;
 
-      report.reportDetail.items.forEach((item: item) => {
+      report.reportDetail.items.forEach((item: IItem) => {
         const severity = item.severity;
 
         if (severity === 'CRITICAL') critical++;
@@ -190,8 +161,9 @@ const History: React.FC = () => {
           <Grid container alignItems="center" spacing={1}>
             <Grid
               item
-              sm={4}
-              xs={6}
+              md={4}
+              sm={5}
+              xs={11}
               onClick={() => onSelectReport(report._id)}
               className={classes.gridButton}
             >
@@ -205,10 +177,10 @@ const History: React.FC = () => {
                 </Typography>
               </Box>
             </Grid>
-            <Hidden xsDown>
+            <Hidden smDown>
               <Grid
                 item
-                sm={4}
+                md={4}
                 onClick={() => onSelectReport(report._id)}
                 className={classes.gridButton}
               >
@@ -217,93 +189,23 @@ const History: React.FC = () => {
                 </Typography>
               </Grid>
             </Hidden>
-            <Grid
-              item
-              sm={3}
-              xs={5}
-              onClick={() => onSelectReport(report._id)}
-              className={classes.gridButton}
-            >
-              <Box display="flex" flexDirection="row" alignItems="center">
-                <Chip
-                  variant="outlined"
-                  size="small"
-                  label={critical}
-                  avatar={
-                    <Avatar
-                      className={
-                        critical > 0
-                          ? classes.avatarCritical
-                          : classes.avatarNone
-                      }
-                    >
-                      C
-                    </Avatar>
-                  }
-                  className={
-                    critical > 0
-                      ? classes.criticalSeverityChip
-                      : classes.noneSeverityChip
-                  }
-                />
-                <Chip
-                  variant="outlined"
-                  size="small"
-                  label={high}
-                  avatar={
-                    <Avatar
-                      className={
-                        high > 0 ? classes.avatarHigh : classes.avatarNone
-                      }
-                    >
-                      H
-                    </Avatar>
-                  }
-                  className={
-                    high > 0
-                      ? classes.highSeverityChip
-                      : classes.noneSeverityChip
-                  }
-                />
-                <Chip
-                  variant="outlined"
-                  size="small"
-                  label={moderate}
-                  avatar={
-                    <Avatar
-                      className={
-                        moderate > 0 ? classes.avatarMedium : classes.avatarNone
-                      }
-                    >
-                      M
-                    </Avatar>
-                  }
-                  className={
-                    moderate > 0
-                      ? classes.moderateSeverityChip
-                      : classes.noneSeverityChip
-                  }
-                />
-                <Chip
-                  variant="outlined"
-                  size="small"
-                  label={low}
-                  avatar={
-                    <Avatar
-                      className={
-                        low > 0 ? classes.avatarLow : classes.avatarNone
-                      }
-                    >
-                      L
-                    </Avatar>
-                  }
-                  className={
-                    low > 0 ? classes.lowSeverityChip : classes.noneSeverityChip
-                  }
-                />
-              </Box>
-            </Grid>
-            <Grid item xs={1} sm={1} className={classes.trashContainer}>
+            <Hidden xsDown>
+              <Grid
+                item
+                sm={5}
+                md={3}
+                onClick={() => onSelectReport(report._id)}
+                className={classes.gridButton}
+              >
+                <Box display="flex" flexDirection="row" alignItems="center">
+                  {renderChip('critical', critical)}
+                  {renderChip('high', high)}
+                  {renderChip('moderate', moderate)}
+                  {renderChip('low', low)}
+                </Box>
+              </Grid>
+            </Hidden>
+            <Grid item xs={1} sm={1} md={1} className={classes.trashContainer}>
               <IconButton
                 onClick={() => onSelectDelete(report._id)}
                 size="small"

@@ -10,13 +10,7 @@ import moment from 'moment';
 import Summary from './Summary';
 import Vulnerability from './Vulnerability';
 
-import { item, ReportInterface } from '../../utils/report-interface';
-import {
-  lowSeverityColor,
-  highSeverityColor,
-  moderateSeverityColor,
-  criticalSeverityColor,
-} from '../../utils/severityColor';
+import { severityColor } from '../../utils/severityColor';
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -28,34 +22,31 @@ const useStyles = makeStyles((theme) => ({
       padding: theme.spacing(4, 3),
     },
   },
-  circle: {
-    border: '2px solid rgb(128, 128, 128, 0.8)',
+  borderCircle: {
+    border: '1px solid rgb(128, 128, 128, 0.8)',
     borderRadius: '100%',
     width: 145,
     height: 145,
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
+    alignItems: 'center',
+  },
+  circle: {
+    borderRadius: '100%',
+    width: 130,
+    height: 130,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    color: '#fff',
   },
   severityItem: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
   },
-  criticalSeverityText: {
-    color: criticalSeverityColor,
-    textAlign: 'center',
-  },
-  highSeverityText: {
-    color: highSeverityColor,
-    textAlign: 'center',
-  },
-  moderateSeverityText: {
-    color: moderateSeverityColor,
-    textAlign: 'center',
-  },
-  lowSeverityText: {
-    color: lowSeverityColor,
+  severityText: {
     textAlign: 'center',
   },
   download: {
@@ -72,7 +63,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Report: React.FC<{ data: ReportInterface; createdDate: string }> = ({
+const Report: React.FC<{ data: IReport; createdDate: string }> = ({
   data,
   createdDate,
 }) => {
@@ -92,7 +83,7 @@ const Report: React.FC<{ data: ReportInterface; createdDate: string }> = ({
       moderate = 0,
       low = 0;
 
-    data.items.forEach((item: item) => {
+    data.items.forEach((item: IItem) => {
       const severity = item.severity;
 
       if (severity === 'CRITICAL') critical++;
@@ -108,6 +99,27 @@ const Report: React.FC<{ data: ReportInterface; createdDate: string }> = ({
     pdfExportComponent?.save();
   };
 
+  const renderCircle = (severity: number, title: string, color: string) => {
+    return (
+      <Grid item sm={3} xs={6} className={classes.severityItem}>
+        <Box className={classes.borderCircle} style={{ borderColor: color }}>
+          <Box className={classes.circle} style={{ backgroundColor: color }}>
+            <Typography
+              variant="h3"
+              className={classes.severityText}
+              color="inherit"
+            >
+              {severity}
+            </Typography>
+            <Typography variant="body1" className={classes.severityText}>
+              {title}
+            </Typography>
+          </Box>
+        </Box>
+      </Grid>
+    );
+  };
+
   const renderReport = (isDownload: boolean) => {
     return (
       <div>
@@ -117,49 +129,37 @@ const Report: React.FC<{ data: ReportInterface; createdDate: string }> = ({
         <Typography variant="h5" color="primary">
           {data.repository_name}
         </Typography>
+        {data.jsonPath && (
+          <Typography variant="h5" color="primary">
+            From: {data.jsonPath}
+          </Typography>
+        )}
+
+        {/* Circle summary part */}
         <Box my={4}>
           <Grid container spacing={1}>
-            <Grid item sm={3} xs={6} className={classes.severityItem}>
-              <Box className={classes.circle}>
-                <Typography
-                  variant="h6"
-                  className={classes.criticalSeverityText}
-                >
-                  CRITICAL <br /> {severities.critical}
-                </Typography>
-              </Box>
-            </Grid>
-            <Grid item sm={3} xs={6} className={classes.severityItem}>
-              <Box className={classes.circle}>
-                <Typography variant="h6" className={classes.highSeverityText}>
-                  HIGH <br /> {severities.high}
-                </Typography>
-              </Box>
-            </Grid>
-            <Grid item sm={3} xs={6} className={classes.severityItem}>
-              <Box className={classes.circle}>
-                <Typography
-                  variant="h6"
-                  className={classes.moderateSeverityText}
-                >
-                  MODERATE <br /> {severities.moderate}
-                </Typography>
-              </Box>
-            </Grid>
-            <Grid item sm={3} xs={6} className={classes.severityItem}>
-              <Box className={classes.circle}>
-                <Typography variant="h6" className={classes.lowSeverityText}>
-                  LOW <br /> {severities.low}
-                </Typography>
-              </Box>
-            </Grid>
+            {renderCircle(
+              severities.critical,
+              'CRITICAL',
+              severityColor('CRITICAL')
+            )}
+            {renderCircle(severities.high, 'HIGH', severityColor('HIGH'))}
+            {renderCircle(
+              severities.moderate,
+              'MODERATE',
+              severityColor('MODERATE')
+            )}
+            {renderCircle(severities.low, 'LOW', severityColor('LOW'))}
           </Grid>
         </Box>
+
         <Summary {...{ items: data.items }} />
         <Box my={5} />
-        <Vulnerability
-          {...{ items: data.items, isDownload, sortValue, setSortValue }}
-        />
+        {data.items.length > 0 && (
+          <Vulnerability
+            {...{ items: data.items, isDownload, sortValue, setSortValue }}
+          />
+        )}
       </div>
     );
   };

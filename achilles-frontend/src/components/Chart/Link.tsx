@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { LINK_STATUS } from 'types/index'
 import { select } from 'd3';
 
 const Link = (props: any) => {
@@ -25,8 +26,16 @@ const Link = (props: any) => {
       .selectAll('path')
       .data(data)
       .join('path')
-      .attr('stroke', '#fff')
-      .attr('marker-start', 'url(#arrow-head)');
+      .attr('stroke', (d: ILink) => {
+        return d.status === LINK_STATUS.VULNERABLE ? '#f00' : '#fff'
+      })
+      .attr('marker-start', 'url(#arrow-head)')
+      .attr('stroke-width', (d: ILink) => {
+        if (d.status === LINK_STATUS.VULNERABLE)
+          return 2
+
+        return 1
+      })
   }
 
   return <g ref={g}></g>;

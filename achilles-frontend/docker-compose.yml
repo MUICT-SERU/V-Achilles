@@ -1,0 +1,18 @@
+version: '3.5'
+services:
+  achilles-frontend-app:
+      container_name: achilles-frontend-docker
+      build:
+        context: .
+        dockerfile: Dockerfile
+      volumes:
+        - '.:/usr/src/app'
+        - '/usr/src/app/node_modules'
+      ports:
+        - '3000:3000'
+      environment:
+        - NODE_ENV=${NODE_ENV}
+        - REACT_APP_API_URL=http://localhost:4000
+        - REACT_APP_APPINSIGHT_KEY=3a284f79-340f-446e-a17e-4a6a71c885b2
+        - REACT_APP_GITHUB_CLIENT_ID=c2d4a7f77ba143e9e502
+      
