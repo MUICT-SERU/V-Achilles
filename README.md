@@ -3,7 +3,7 @@
 Achilles is a tool that shows a visualization (i.e., using dependency graphs) of both direct andindirect dependencies that are affected by software vulnerabilityattacks. 
 
 ## Demo Website
-The working prototype of Achilles can be found here: (https://achilles-sp.azurewebsites.net/)[https://achilles-sp.azurewebsites.net/]
+The working prototype of Achilles can be found here: [https://achilles-sp.azurewebsites.net/](https://achilles-sp.azurewebsites.net)
 
 <!---
 ## Minutes of Meeting
@@ -32,7 +32,7 @@ The working prototype of Achilles can be found here: (https://achilles-sp.azurew
 - OR the documents have been submitted to the submission system.
 -->
 
-### Achilles website
+## Installation Guides
 The Achilles website was built by two folders below, please read `README.md` in each folder to see how to get started. 
 - achilles-frontend (Front-end): [README.md](https://github.com/MUICT-SERU/Achilles/blob/master/achilles-frontend/README.md)
 - baak-dataload-sql (Back-end): [README.md](https://github.com/MUICT-SERU/Achilles/blob/master/baak-dataload-sql/README.md)
