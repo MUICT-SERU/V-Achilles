@@ -28,3 +28,8 @@ Achilles is a tool that shows a visualization (i.e., using dependency graphs) of
 - The documents have been uploaded to Google Drive folder
 - OR the documents have been submitted to the submission system.
 -->
+
+### Achilles website
+The Achilles website was built by two folders below, please read `README.md` in each folder to see how to get started. 
+- achilles-frontend (Front-end): [README.md](https://github.com/MUICT-SERU/Achilles/blob/master/achilles-frontend/README.md)
+- baak-dataload-sql (Back-end): [README.md](https://github.com/MUICT-SERU/Achilles/blob/master/baak-dataload-sql/README.md)
