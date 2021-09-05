@@ -27,7 +27,7 @@ const Link = (props: any) => {
       .data(data)
       .join('path')
       .attr('stroke', (d: ILink) => {
-        return d.status === LINK_STATUS.VULNERABLE ? '#f00' : '#fff'
+        return d.status === LINK_STATUS.VULNERABLE ? 'rgb(213,94,0)' : '#000'
       })
       .attr('marker-start', 'url(#arrow-head)')
       .attr('stroke-width', (d: ILink) => {

@@ -322,7 +322,7 @@ const Chart = (props: any) => {
       .attr('xoverflow', 'visible')
       .append('svg:path')
       .attr('d', 'M 4,-2 L 0 ,0 L 4,2')
-      .attr('fill', '#fff');
+      .attr('fill', '#000');
     // .attr('stroke', '#fff')
   }
 
@@ -711,7 +711,7 @@ const Chart = (props: any) => {
         />
 
         <svg ref={svgRef} width="100%" height="100%">
-          <rect fill="#333" width="100%" height="100%" x="-50%" y="-50%" />
+          <rect fill="#dddddd" width="100%" height="100%" x="-50%" y="-50%" />
           <g>
             {simulation.current ? (
               <>
