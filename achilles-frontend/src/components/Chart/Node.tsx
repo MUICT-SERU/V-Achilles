@@ -42,21 +42,21 @@ const Node = (props: any) => {
       })
       .attr('fill', (d: INode) => {
         if (d.type === NODE_TYPE.ROOT) {
-          return '#9722e6';
+          return 'rgb(204, 121,167)';
         } else {
           if (d.status === NODE_STATUS.VULNERABLE) {
-            return '#f00';
+            return 'rgb(213, 94, 0)';
           }
 
           switch (d.level) {
             case 1:
-              return '#0ef';
+              return 'rgb(230, 159, 0)';
             case 2:
-              return '#00f';
+              return 'rgb(0, 114, 178)';
             case 3:
-              return '#0f0';
+              return 'rgb(240, 228, 66)';
             case 4:
-              return '#ff0';
+              return 'rgb(0, 158, 115)';
             default:
               return '#fff;';
           }
@@ -78,7 +78,7 @@ const Node = (props: any) => {
         return 8;
       })
       .attr('y', '0.31em')
-      .attr('fill', '#fff');
+      .attr('fill', '#382119');
 
     // Add mouseover/mouseout event for node
     nodes.current.each(function (this: any, d: any) {
