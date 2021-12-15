@@ -1,12 +1,12 @@
 # Achilles
 ## Prioritizing Vulnerable Dependency Updates through Dependency Graphs
-Achilles is a tool that shows a visualization (i.e., using dependency graphs) of both direct andindirect dependencies that are affected by software vulnerabilityattacks. 
+Achilles is a tool that shows a visualization (i.e., using dependency graphs) of both direct and indirect dependencies that are affected by software vulnerabilityattacks. 
 
 ## Demo Website
-The working prototype of Achilles can be found here: [https://achilles-sp.azurewebsites.net/](https://achilles-sp.azurewebsites.net)
+The working prototype of Achilles can be found here: [https://achillestool.com/](https://achillestool.com/)
 
 ## Screenshot of Achilles
-![alt text](https://raw.githubusercontent.com/MUICT-SERU/Achilles/master/achilles.png)
+![CleanShot 2564-12-15 at 18 32 52@2x](https://user-images.githubusercontent.com/1671353/146179237-74cca704-9160-4b63-b84f-e8d2bfd91e08.png)
 
 <!---
 ## Minutes of Meeting
