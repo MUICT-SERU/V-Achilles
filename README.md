@@ -5,6 +5,9 @@ Achilles is a tool that shows a visualization (i.e., using dependency graphs) of
 ## Demo Website
 The working prototype of Achilles can be found here: [https://achillestool.com/](https://achillestool.com/)
 
+## Video Demo
+The demo video on how Achilles works can be found here: [https://youtu.be/tspiZfhMNcs](https://youtu.be/tspiZfhMNcs)
+
 ## Screenshot of Achilles
 ![CleanShot 2564-12-15 at 18 32 52@2x](https://user-images.githubusercontent.com/1671353/146179237-74cca704-9160-4b63-b84f-e8d2bfd91e08.png)
 
