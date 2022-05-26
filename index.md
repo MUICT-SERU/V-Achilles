@@ -27,10 +27,10 @@ The Achilles website was built by two folders below, please read `README.md` in 
 - baak-dataload-sql (Back-end): [README.md](https://github.com/MUICT-SERU/Achilles/blob/master/baak-dataload-sql/README.md)
 
 ## Team
-Vipawan Jarukitpipat, Klinton Chhun, Wachirayana Wanprasert, [Chaiyong Ragkhitwetsagul](https://cragkhit.github.io/), [Morakot Choetkiertikul](https://morakotch.wordpress.com/), [Thanwadee Sunetnanta](http://mucc.mahidol.ac.th/~ittth/)
-[Software Engineering Research Unit (SERU)](https://muict-seru.github.io/)
+Vipawan Jarukitpipat, Klinton Chhun, Wachirayana Wanprasert, [Chaiyong Ragkhitwetsagul](https://cragkhit.github.io/), [Morakot Choetkiertikul](https://morakotch.wordpress.com/), [Thanwadee Sunetnanta](http://mucc.mahidol.ac.th/~ittth/),
+[Software Engineering Research Unit (SERU)](https://muict-seru.github.io/),
 [Faculty of Information and Communication Technology (ICT), Mahidol University](https://www.ict.mahidol.ac.th/), Thailand
 
-[Raula Gaikovina Kula](https://raux.github.io/), [Bodin Chinthanet](https://bchinthanet.com/), [Takashi Ishio](https://takashi-ishio.github.io/index-en.html), [Kenichi Matsumoto](https://scholar.google.com/citations?user=-DfBligAAAAJ&hl=en)
-[Software Engineering Research Lab](https://isw3.naist.jp/Research/cs-se-en.html)
+[Raula Gaikovina Kula](https://raux.github.io/), [Bodin Chinthanet](https://bchinthanet.com/), [Takashi Ishio](https://takashi-ishio.github.io/index-en.html), [Kenichi Matsumoto](https://scholar.google.com/citations?user=-DfBligAAAAJ&hl=en),
+[Software Engineering Research Lab](https://isw3.naist.jp/Research/cs-se-en.html),
 Nara Institute of Science and Technology (NAIST), Japan
