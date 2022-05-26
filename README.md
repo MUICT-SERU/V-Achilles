@@ -8,10 +8,6 @@ The working prototype of V-Achilles can be found here: [https://achillestool.com
 ## Video Demo
 The demo video on how V-Achilles works can be found here: [https://youtu.be/tspiZfhMNcs](https://youtu.be/tspiZfhMNcs)
 
-<div>
-<iframe width="560" height="315" src="https://www.youtube.com/embed/tspiZfhMNcs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</div>
-
 ## Screenshot of V-Achilles
 ![CleanShot 2564-12-15 at 18 32 52@2x](https://user-images.githubusercontent.com/1671353/146179237-74cca704-9160-4b63-b84f-e8d2bfd91e08.png)
 
