@@ -19,7 +19,7 @@ The demo video on how V-Achilles works can be found here: [https://youtu.be/tspi
 - sinopia: [report](files/sinopia.pdf)
 - cpnmjs: [report](files/cpnmjs.pdf)
 - window-build-tool: [report](files/windows-build-tools.png)
-- npx: [report](files/npx.pdf)
+- npx: [report](files/npx.png)
 
 <!---
 ## Minutes of Meeting
