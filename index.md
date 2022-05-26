@@ -16,10 +16,11 @@ The demo video on how V-Achilles works can be found here: [https://youtu.be/tspi
 ![CleanShot 2564-12-15 at 18 32 52@2x](https://user-images.githubusercontent.com/1671353/146179237-74cca704-9160-4b63-b84f-e8d2bfd91e08.png)
 
 ## Vulnerability Reports of the 4 GitHub Repositories
-sinopia: [report](files/sinopia.pdf)
-cpnmjs: [report](files/cpnmjs.pdf)
-window-build-tool: [report](files/windows-build-tools.png)
-npx: [report](files/npx.pdf)
+- sinopia: [report](files/sinopia.pdf)
+- cpnmjs: [report](files/cpnmjs.pdf)
+- window-build-tool: [report](files/windows-build-tools.png)
+- npx: [report](files/npx.pdf)
+
 <!---
 ## Minutes of Meeting
 - Mon. 3 Aug 2020: https://www.notion.so/Meeting-4-80fc86a885a043818c2bb64ff3cea2e7
