@@ -14,8 +14,8 @@ The demo video on how V-Achilles works can be found here: [https://youtu.be/tspi
 ## Vulnerability Reports of the 4 GitHub Repositories
 - sinopia: [report](files/sinopia.pdf)
 - cpnmjs: [report](files/cpnmjs.pdf)
-- window-build-tool: [report](files/windows-build-tools.png)
-- npx: [report](files/npx.png)
+- window-build-tool: [report](files/windows-build-tools.pdf)
+- npx: [report](files/npx.pdf)
 
 ## Installation Guides
 The Achilles website was built by two folders below, please read `README.md` in each folder to see how to get started. 
