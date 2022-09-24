@@ -109,14 +109,14 @@ const NavBar: React.FC = () => {
             <Typography variant="h5">Achilles</Typography>
           </ButtonBase>
           <Box flexGrow={1} />
-          <Hidden xsDown>
+          <div>
             <ButtonBase onClick={onLogout}>
               <Typography variant="body1">Logout</Typography>
             </ButtonBase>
             <Typography variant="body1" className={classes.userAccName}>
               {userData ? userData?.username : ''}
             </Typography>
-          </Hidden>
+          </div>
 
           <Avatar
             alt="User profile"

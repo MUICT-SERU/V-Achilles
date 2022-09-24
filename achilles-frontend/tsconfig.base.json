@@ -1,0 +1,76 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "paths": {
+      "app/*": [
+        "src/*"
+      ],
+      "assets/*": [
+        "src/assets/*"
+      ],
+      "core/*": [
+        "src/core/*"
+      ],
+      "components/*": [
+        "src/components/*"
+      ],
+      "containers/*": [
+        "src/containers/*"
+      ],
+      "ducks/*": [
+        "rsrc/edux/modules/*"
+      ],
+      "hooks/*": [
+        "src/hooks/*"
+      ],
+      "lib/*": [
+        "src/lib/*"
+      ],
+      "pages/*": [
+        "src/pages/*"
+      ],
+      "routes/*": [
+        "src/routes/*"
+      ],
+      "styled/*": [
+        "csrc/omponents/styled/*"
+      ],
+      "styles/*": [
+        "src/styles/*"
+      ],
+      "themes/*": [
+        "src/themes/*"
+      ],
+      "types/*": [
+        "src/types/*"
+      ],
+      "utils/*": [
+        "src/utils/*"
+      ],
+      "vars/*": [
+        "src/vars/*"
+      ]
+    }
+  },
+  "include": [
+    "src"
+  ]
+}

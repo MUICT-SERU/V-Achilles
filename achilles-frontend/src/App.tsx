@@ -1,25 +1,25 @@
-import { Provider } from "react-redux";
-import { store } from "./redux/store";
-
-import { CssBaseline } from "@material-ui/core";
-import { ThemeProvider } from "@material-ui/styles";
-
-import Routes from "./routes";
-import { BrowserRouter as Router } from "react-router-dom";
-
-import theme from "./themes";
-import "./App.css";
+import React from 'react';
+import logo from './logo.svg';
+import './App.css';
 
 function App() {
   return (
-    <Router>
-      <CssBaseline />
-      <ThemeProvider theme={theme}>
-        <Provider store={store}>
-          <Routes />
-        </Provider>
-      </ThemeProvider>
-    </Router>
+    <div className="App">
+      <header className="App-header">
+        <img src={logo} className="App-logo" alt="logo" />
+        <p>
+          Edit <code>src/App.tsx</code> and save to reload.
+        </p>
+        <a
+          className="App-link"
+          href="https://reactjs.org"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Learn React
+        </a>
+      </header>
+    </div>
   );
 }
 
