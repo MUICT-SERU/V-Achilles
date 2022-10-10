@@ -3,7 +3,7 @@
 V-Achilles is a tool that shows a visualization (i.e., using dependency graphs) of both direct and indirect dependencies that are affected by software vulnerabilityattacks. 
 
 ## Demo Website
-The working prototype of V-Achilles can be found here: [https://achillestool.com/](https://achillestool.com/)
+The working prototype of V-Achilles can be found here: [https://v-achilles.com](https://v-achilles.com)
 
 ## Video Demo
 The demo video on how V-Achilles works can be found here: [https://youtu.be/tspiZfhMNcs](https://youtu.be/tspiZfhMNcs)
