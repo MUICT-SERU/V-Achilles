@@ -17,6 +17,12 @@ The demo video on how V-Achilles works can be found here: [https://youtu.be/tspi
 - window-build-tool: [report](files/windows-build-tools.pdf)
 - npx: [report](files/npx.pdf)
 
+## Results from the User Study
+<img width="589" alt="Task1-Exp" src="https://user-images.githubusercontent.com/1671353/220164930-209cf168-6931-48eb-8b90-bce198700402.png">
+<img width="585" alt="Task1-Ctrl" src="https://user-images.githubusercontent.com/1671353/220164943-277be9c9-c113-43c2-b42a-7dcbec6e6863.png">
+<img width="567" alt="Task2-Exp" src="https://user-images.githubusercontent.com/1671353/220164960-ccd23f1b-5038-4053-8507-ede36dce8cae.png">
+<img width="571" alt="Task2-Ctrl" src="https://user-images.githubusercontent.com/1671353/220164965-30d76de5-f4f9-46d1-ab91-f85b0cc1bc62.png">
+
 ## Installation Guides
 The Achilles website was built by two folders below, please read `README.md` in each folder to see how to get started. 
 - achilles-frontend (Front-end): [README.md](https://github.com/MUICT-SERU/Achilles/blob/master/achilles-frontend/README.md)
